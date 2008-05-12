@@ -3,8 +3,12 @@
 
 #include "types.h"
 
+#include <stdio.h>
+
 NODE* allocateNode(BTREE* btree);
 
 void freeNode(NODE* node);
+
+NODE* loadNode(BTREE* btree, FILE* file, LONG position);
 
 #endif /*NODE_H_*/

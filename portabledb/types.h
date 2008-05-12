@@ -1,6 +1,8 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
+#include <stdio.h>
+
 /* ****************************************************************************
  *      COMMON USED TYPES
  * ****************************************************************************/
@@ -20,8 +22,7 @@ typedef struct
     INT     key;            /* position of records' key             */
     INT     keySize;        /* size of a records' key               */
     LONG    root;           /* position of the B-trees' root node   */
-}
- BTREE;
+} BTREE;
 
 /* ****************************************************************************
  *      THE B-TREE NODE DATA STRUCTURE
@@ -30,10 +31,22 @@ typedef struct
 typedef struct
 {
     INT     recordCount;    /* count of records in the node         */
-    LONG    subnodeLeft;    /* position of the nodes' left subnode  */
     char*   data;           /* data records in the node             */
     LONG*   subnodes;       /* positions of the remaining subnodes  */
-}
- NODE;
+} NODE;
+
+/* ****************************************************************************
+ *      THE SEARCH PARAMETERS STRUCTURE
+ * ****************************************************************************/
+typedef struct
+{
+	FILE*	file;
+	BTREE*	btree;
+	char*	key;
+	NODE*	node;
+	INT		position;
+	INT		subnode;
+	int		wasFound;
+} SEARCHPARAM;
 
 #endif /*TYPES_H_*/
