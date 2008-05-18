@@ -107,13 +107,15 @@ BTREESEARCH;
 /**
  * Node macros
  */
-#define	MDATA(n,pos)		n->tag->data+pos
-#define MRECORD(n,i)		n->tag->data+(i*MRECSIZE(n->btree))
-#define MSUBNODE(n,i)		n->tag->subnodes[i]
+#define	MDATA(node)			node->tag->data
+#define MRECORDS(node)		node->tag->records
+#define MSUBNODES(node)		node->tag->subnodes
+#define MRECORD(node,i)		node->tag->data+(i*MRECSIZE(node->btree))
+#define MSUBNODE(node,i)	node->tag->subnodes[i]
 
 /**
  * Record macros
  */
-#define MKEY(r,b)			r+MKEYPOS(b)
+#define MKEY(record,btree)	record+MKEYPOS(btree)
 
 #endif /*TYPES_H_*/
