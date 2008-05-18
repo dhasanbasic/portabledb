@@ -9,23 +9,27 @@
 /* 							   MEMORY OPERATIONS							  */
 /* ************************************************************************** */
 
-BTREE*	createBtree(FILE*		file,
+void	createBtree(BTREE*		btree,
+					FILE*		file,
 					const SINT	order,
 					const SINT	recordSize,
 					const SINT	keyPosition,
 					const SINT	keySize)
 {
-	BTREE* btree 				= (BTREE*)malloc(sizeof(BTREE));
 	btree->file 				= file;
 	btree->position 			= 0;
 	
-	btree->tag					= (BTREETAG*)malloc(sizeof(BTREETAG));
 	btree->tag->order			= order;
 	btree->tag->recordSize		= recordSize;
 	btree->tag->keyPosition		= keyPosition;
 	btree->tag->keySize			= keySize;
-	btree->tag->rootPosition	= 0;
-	
+	btree->tag->rootPosition	= 0;	
+}
+
+BTREE*	allocateBtree()
+{
+	BTREE* btree 				= (BTREE*)malloc(sizeof(BTREE));
+	btree->tag					= (BTREETAG*)malloc(sizeof(BTREETAG));
 	return btree;
 }
 
@@ -35,7 +39,7 @@ void	freeBtree(BTREE* btree)
 	free(btree);
 }
 
-NODE*	createNode(BTREE* btree)
+NODE*	allocateNode(BTREE* btree)
 {
 	NODE* node			= (NODE*)malloc(sizeof(NODE));
 	node->btree 		= btree;

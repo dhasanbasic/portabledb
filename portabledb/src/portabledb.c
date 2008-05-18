@@ -24,46 +24,43 @@ void printNode(NODE* node)
 	
 	printf("\n");
 }
-
-void prepareNew(FILE* file)
+*/
+void prepareNew()
 {
-	BTREE* btree = createBtree();
+	BTREE* btree;	
 	NODE* node;
+	FILE* file;
+
+	remove("db.dat");
+	file = fopen("db.dat", "w+b");
+	file = freopen("db.dat","r+b",file);
 	
-	btree->file = file;
-	btree->position = 0;
-	btree->tag->root = sizeof(BTREE);
-	btree->tag->order = 3;
-	btree->tag->rSize = 4;
-	btree->tag->kPos = 0;
-	btree->tag->kSize = 2;
+	btree = allocateBtree();
+	createBtree(btree, file, 3 , 4, 0, 2);
+	saveBtree(btree);
 	
-	node = createNode(btree);
+	fseek(file,0,SEEK_END);
+	btree->tag->rootPosition = ftell(file);
+	saveBtree(btree);
 	
-	node->position = btree->tag->root;
-	
-	saveTree(btree);
+	node = allocateNode(btree);
 	saveNode(node);
+	
+	fclose(file);
 	freeNode(node);
 	freeBtree(btree);
 }
-*/
+
 int main(void)
 {
-//BPARAM* p = (BPARAM*)malloc(sizeof(BPARAM));
 //	BTREE* btree = createBtree();
-//	NODE* node;
 	/******************************************************/
 //	p->record = (char*)malloc(4);
 //	btree->file = fopen("db.dat", "r+b");
 //	btree->position = 0;
 	/******************************************************/
-/*
-	system("rm db.dat");
-	system("touch db.dat");
-	btree->file = fopen("db.dat", "r+b");
-	prepareNew(btree->file);
-*/
+	
+	prepareNew();
 	
 	/******************************************************/
 //	fclose(btree->file);
