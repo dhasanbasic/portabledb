@@ -98,22 +98,22 @@ BTREESEARCH;
 /**
  * B-tree macros
  */
-#define	KEY_POSITION(btree)	btree->tag->keyPosition
-#define KEY_SIZE(btree)		btree->tag->keySize
-#define RECORD_SIZE(btree)	btree->tag->recordSize
-#define ORDER(btree)		btree->tag->order
-#define ROOT_NODE(btree)	btree->tag->root
+#define	MKEYPOS(btree)		btree->tag->keyPosition
+#define MKEYSIZE(btree)		btree->tag->keySize
+#define MRECSIZE(btree)		btree->tag->recordSize
+#define MORDER(btree)		btree->tag->order
+#define MROOT(btree)		btree->tag->root
 
 /**
  * Node macros
  */
-#define	DATA_AT(n,pos)		n->tag->data+pos
-#define RECORD_AT(n,i)		n->tag->data+(i*RECORD_SIZE(n->btree))
-#define SUBNODE(n,i)		n->tag->subnodes[i]
+#define	MDATA(n,pos)		n->tag->data+pos
+#define MRECORD(n,i)		n->tag->data+(i*MRECSIZE(n->btree))
+#define MSUBNODE(n,i)		n->tag->subnodes[i]
 
 /**
  * Record macros
  */
-#define KEY_FROM(r,b)		r+KEY_POSITION(b)
+#define MKEY(r,b)			r+MKEYPOS(b)
 
 #endif /*TYPES_H_*/
