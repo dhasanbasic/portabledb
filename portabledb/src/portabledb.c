@@ -5,26 +5,25 @@
 
 #include "btreelayer.h"
 
-/*
+
 void printNode(NODE* node)
 {
-	UINT i;
+	SINT i;
 	
-	printf("\n--> records = %d", node->records);
+	printf(" records: %d\n", MRECORDS(node));
+	printf("    data: ");
 	
-	printf("\n--> DATA: ");
+	for(i=0; i<(MORDER(node->btree)*MRECSIZE(node->btree)); i++)
+		printf("%c",(MDATA(node)[i]!=0)?MDATA(node)[i]:'?');
 	
-	for(i=0; i<(node->btree->tag->rSize * node->btree->tag->order); i++)
-		printf("%c",(node->data[i]!=0)?node->data[i]:'?');
+	printf("\nsubnodes: ");
 	
-	printf("\n--> SUBNODES: ");
-	
-	for(i=0; i<(node->btree->tag->order+1); i++)
-		printf("%d ", node->subnodes[i]);
+	for(i=0; i<(MORDER(node->btree)+1); i++)
+		printf("%d ", MSUBNODES(node)[i]);
 	
 	printf("\n");
 }
-*/
+
 void prepareNew()
 {
 	BTREE* btree;	
@@ -33,6 +32,9 @@ void prepareNew()
 
 	remove("db.dat");
 	file = fopen("db.dat", "w+b");
+	
+	fputs("PDB", file);
+	
 	file = freopen("db.dat","r+b",file);
 	
 	btree = allocateBtree();
@@ -53,18 +55,21 @@ void prepareNew()
 
 int main(void)
 {
-//	BTREE* btree = createBtree();
-	/******************************************************/
-//	p->record = (char*)malloc(4);
-//	btree->file = fopen("db.dat", "r+b");
-//	btree->position = 0;
-	/******************************************************/
+	BTREE* btree = allocateBtree();
+	NODE* node;
+
+	btree->file = fopen("db.dat","r+b");
+	btree->position = 3;
+	loadBtree(btree);
+
+	node = allocateNode(btree);
+	loadNode(node);
+	printNode(node);
+
+	freeNode(node);
+	fclose(btree->file);
+	freeBtree(btree);
 	
-	prepareNew();
-	
-	/******************************************************/
-//	fclose(btree->file);
-	/******************************************************/
 	return EXIT_SUCCESS;
 }
 

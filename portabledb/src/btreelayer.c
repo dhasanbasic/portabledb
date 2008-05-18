@@ -57,6 +57,7 @@ void	freeNode(NODE* node)
 {
 	cfree(node->tag->subnodes);
 	free(node->tag->data);
+	free(node->tag);
 	free(node);
 }
 /* ********************************** *** *********************************** */
@@ -84,23 +85,6 @@ void	saveBtree(BTREE* btree)
 	fwrite(btree->tag,sizeof(BTREETAG),1,btree->file);
 }
 
-void	loadNode(NODE* node)
-{
-	unsigned int numSize 	= sizeof(SINT);
-	unsigned int datSize 	= MORDER(node->btree) * MRECSIZE(node->btree);
-	unsigned int subSize 	= (MORDER(node->btree)+1) * sizeof(LONG);
-	unsigned int buffSize	= numSize + datSize + subSize; 	
-	
-	char* buff = (char*)malloc(buffSize);
-	
-	memcpy(buff+0,				 &MRECORDS(node), numSize);
-	memcpy(buff+numSize,		 MDATA(node), datSize);
-	memcpy(buff+numSize+datSize, MSUBNODES(node), subSize);
-	
-	fseek(node->btree->file, node->position, SEEK_SET);
-	fwrite(buff,buffSize,1,node->btree->file);
-}
-
 void	saveNode(NODE* node)
 {
 	unsigned int numSize 	= sizeof(SINT);
@@ -117,6 +101,23 @@ void	saveNode(NODE* node)
 	}
 	else
 		fseek(node->btree->file, node->position, SEEK_SET);
+	
+	memcpy(buff+0,				 &MRECORDS(node), numSize);
+	memcpy(buff+numSize,		 MDATA(node), datSize);
+	memcpy(buff+numSize+datSize, MSUBNODES(node), subSize);
+	
+	fseek(node->btree->file, node->position, SEEK_SET);
+	fwrite(buff,buffSize,1,node->btree->file);
+}
+
+void	loadNode(NODE* node)
+{
+	unsigned int numSize 	= sizeof(SINT);
+	unsigned int datSize 	= MORDER(node->btree) * MRECSIZE(node->btree);
+	unsigned int subSize 	= (MORDER(node->btree)+1) * sizeof(LONG);
+	unsigned int buffSize	= numSize + datSize + subSize; 	
+	
+	char* buff = (char*)malloc(buffSize);
 	
 	fread(buff,buffSize,1,node->btree->file);
 	
