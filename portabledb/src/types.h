@@ -102,7 +102,7 @@ BTREESEARCH;
 #define MKEYSIZE(btree)		btree->tag->keySize
 #define MRECSIZE(btree)		btree->tag->recordSize
 #define MORDER(btree)		btree->tag->order
-#define MROOT(btree)		btree->tag->root
+#define MROOT(btree)		btree->tag->rootPosition
 
 /**
  * Node macros
@@ -112,10 +112,6 @@ BTREESEARCH;
 #define MSUBNODES(node)		node->tag->subnodes
 #define MRECORD(node,i)		node->tag->data+(i*MRECSIZE(node->btree))
 #define MSUBNODE(node,i)	node->tag->subnodes[i]
-
-/**
- * Record macros
- */
-#define MKEY(record,btree)	record+MKEYPOS(btree)
+#define MKEY(node,i)		MRECORD(node,i)+MKEYPOS(node->btree)
 
 #endif /*TYPES_H_*/
