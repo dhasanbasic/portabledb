@@ -109,8 +109,11 @@ BTREESEARCH;
  */
 #define	DATA_AT(n,pos)		n->tag->data+pos
 #define RECORD_AT(n,i)		n->tag->data+(i*RECORD_SIZE(n->btree))
-#define KEY_AT(n,i)			RECORD_AT(n,i)+KEY_POSITION(n->btree)
 #define SUBNODE(n,i)		n->tag->subnodes[i]
 
+/**
+ * Record macros
+ */
+#define KEY_FROM(r,b)		r+KEY_POSITION(b)
 
 #endif /*TYPES_H_*/
