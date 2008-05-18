@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "btree.h"
-#include "node.h"
+#include "btreelayer.h"
 
+/*
 void printNode(NODE* node)
 {
 	UINT i;
@@ -47,16 +47,16 @@ void prepareNew(FILE* file)
 	freeNode(node);
 	freeBtree(btree);
 }
-
+*/
 int main(void)
 {
-	BPARAM* p = (BPARAM*)malloc(sizeof(BPARAM));
-	BTREE* btree = createBtree();
-	NODE* node;
+//BPARAM* p = (BPARAM*)malloc(sizeof(BPARAM));
+//	BTREE* btree = createBtree();
+//	NODE* node;
 	/******************************************************/
-	p->record = (char*)malloc(4);
-	btree->file = fopen("db.dat", "r+b");
-	btree->position = 0;
+//	p->record = (char*)malloc(4);
+//	btree->file = fopen("db.dat", "r+b");
+//	btree->position = 0;
 	/******************************************************/
 /*
 	system("rm db.dat");
@@ -64,28 +64,11 @@ int main(void)
 	btree->file = fopen("db.dat", "r+b");
 	prepareNew(btree->file);
 */
-	loadTree(btree);
-	
-	node = createNode(btree);
-	node->position = btree->tag->root;
-	
-	loadNode(node);
-	p->node = node;
-	
-	strncpy(p->record, "aa00", 4);
-	insertRecord(p);
-
-	strncpy(p->record, "bb00", 4);
-	insertRecord(p);
-
-	printNode(node);
 	
 	/******************************************************/
-	fclose(btree->file);
-	freeNode(node);
-	freeBtree(btree);
-	free(p->record);
-	free(p);
+//	fclose(btree->file);
 	/******************************************************/
 	return EXIT_SUCCESS;
 }
+
+
