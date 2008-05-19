@@ -60,6 +60,33 @@ void	freeNode(NODE* node)
 	free(node->tag);
 	free(node);
 }
+
+void	moveRecords(NODE* node, SINT srcPos, SINT destPos, SINT count)
+{
+	char* srcPtr;
+	char* destPtr;
+	SINT size;
+	
+	srcPtr 	= MRECORD(node,srcPos);
+	destPtr	= MRECORD(node,destPos);
+	size	= count * MRECSIZE(node->btree);
+	
+	memmove(destPtr, srcPtr, size);
+}
+
+void	moveSubnodes(NODE* node, SINT srcPos, SINT destPos, SINT count)
+{
+	LONG* srcPtr;
+	LONG* destPtr;
+	SINT size;
+	
+	srcPtr 	= &MSUBNODE(node,srcPos);
+	destPtr	= &MSUBNODE(node,destPos);
+	size	= count * sizeof(LONG);
+	
+	memmove(destPtr, srcPtr, size);
+}
+
 /* ********************************** *** *********************************** */
 
 /* ************************************************************************** */
@@ -119,6 +146,7 @@ void	loadNode(NODE* node)
 	
 	char* buff = (char*)malloc(buffSize);
 	
+	fseek(node->btree->file, node->position, SEEK_SET);
 	fread(buff,buffSize,1,node->btree->file);
 	
 	memcpy(&MRECORDS(node),	buff+0, numSize);
@@ -137,22 +165,24 @@ int		recursiveSearch(BTREESEARCH* p)
 	BTREE* btree = p->node->btree;
 	SINT i;
 	
-	loadNode(p->node);	
+	loadNode(p->node);
+	
+	if (MRECORDS(p->node) == 0) return SEARCH_EMPTY;
 	
 	/* should the search be continued in the left subnode? */
 	if (memcmp(p->key, MKEY(p->node,0), MKEYSIZE(btree)) < 0)
 	{
 		p->position = 0;
-		if(MSUBNODE(p->node,0) == 0) return -1;
+		if(MSUBNODE(p->node,0) == 0) return SEARCH_FIRST;
 		p->node->position = MSUBNODE(p->node,0);
 		recursiveSearch(p);
 	}
 	
 	/* should the search be continued in the right subnode? */
-	if (memcmp(p->key, MKEY(p->node,MRECORDS(p->node)-1), MKEYSIZE(btree)) > 0)
+	if (memcmp(p->key, MKEY(p->node,(MRECORDS(p->node)-1)), MKEYSIZE(btree)) > 0)
 	{
 		p->position = MRECORDS(p->node);
-		if(MSUBNODE(p->node,MRECORDS(p->node)) == 0) return 1;
+		if(MSUBNODE(p->node,MRECORDS(p->node)) == 0) return SEARCH_LAST;
 		p->node->position = MSUBNODE(p->node,MRECORDS(p->node));
 		recursiveSearch(p);
 	}
@@ -166,7 +196,7 @@ int		recursiveSearch(BTREESEARCH* p)
 			p->record = (char*)malloc(MRECSIZE(btree));
 			memcpy(p->record, MRECORD(p->node,i), MRECSIZE(btree));
 			p->position = i;
-			return 0;
+			return SEARCH_FOUND;
 		}
 		
 		if (i == MRECORDS(p->node)-1) continue;
@@ -175,8 +205,8 @@ int		recursiveSearch(BTREESEARCH* p)
 		if (   memcmp(p->key, MKEY(p->node,i), MKEYSIZE(btree)) > 0
 			&& memcmp(p->key, MKEY(p->node,i+1), MKEYSIZE(btree)) < 0)
 		{
-			p->position = i;
-			if(MSUBNODE(p->node,i) == 0) return 0;
+			p->position = 1;
+			if(MSUBNODE(p->node,i) == 0) return SEARCH_INSIDE;
 			p->node->position = MSUBNODE(p->node,i);
 			recursiveSearch(p);
 		}
@@ -203,56 +233,68 @@ int		insertRecord(BTREE* btree, void* record)
 	
 	p->key = (char*)record+MKEYPOS(btree);
 	p->node = allocateNode(btree);
-	p->position = MROOT(btree);
+	p->node->position = MROOT(btree);
 	p->record = NULL;
 	
 	result = recursiveSearch(p);
 	
-	if (result < 0)
+	switch (result)
 	{
-		/* make place for the new record */
-		memmove(MRECORD(p->node,1), MRECORD(p->node,0),
-				MRECORDS(p->node) * MRECSIZE(btree));
+	/* the root node is "empty" */
+	case SEARCH_EMPTY:
 		
-		memmove(&MSUBNODES(p->node)[1], &MSUBNODES(p->node)[0],
-				(MRECORDS(p->node)+1) * sizeof(LONG));
-		
-		/* insert the record */
 		memcpy(MRECORD(p->node,0), record, MRECSIZE(btree));
 		MRECORDS(p->node)++;
-		MSUBNODE(p->node,0) = 0;
-	}
-	else if (result > 0)
-	{
-		/* insert the record */
-		memcpy(MRECORD(p->node,MRECORDS(p->node)), record, MRECSIZE(btree));
+		break;
+		
+	/* insert the record before the first record */
+	case SEARCH_FIRST:
+		
+		/* shift the old records */
+		moveRecords(p->node, 0, 1, MRECORDS(p->node));
+		moveSubnodes(p->node, 0, 1, MRECORDS(p->node)+1);
+		/* insert the new record */
+		memcpy(MDATA(p->node), record, MRECSIZE(btree));
 		MRECORDS(p->node)++;
-	}
-	else
-	{
-		if (p->record != NULL)
-		{
-			freeNode(p->node);
-			free(p);
-			return -1;
-		}
+		MSUBNODE(p->node,0) = 0;
+		break;
 		
-		/* make place for the new record */
-		memmove(MRECORD(p->node,p->position+1), MRECORD(p->node,p->position),
-				(MRECORDS(p->node) - p->position) * MRECSIZE(btree));
+	/* insert the record after the last record */
+	case SEARCH_LAST:
 		
-		memmove(&MSUBNODES(p->node)[p->position+1],
-				&MSUBNODES(p->node)[p->position],
-				(MRECORDS(p->node) - p->position + 1) * sizeof(LONG));
+		memcpy(MRECORD(p->node, MRECORDS(p->node)), record, MRECSIZE(btree));
+		MRECORDS(p->node)++;
+		break;
 		
-		/* insert the record */
+	/* insert the record after "p->position"-th record */
+	case SEARCH_INSIDE:
+		
+		/* shift the old record */
+		moveRecords(p->node, p->position, p->position+1,
+				MRECORDS(p->node) - p->position);
+		
+		moveSubnodes(p->node, p->position+1, p->position+2,
+				MRECORDS(p->node) - p->position);
+
+		/* insert the new record */
 		memcpy(MRECORD(p->node,p->position), record, MRECSIZE(btree));
 		MRECORDS(p->node)++;
-		MSUBNODE(p->node,p->position) = 0;	
-	}	
+		MSUBNODE(p->node,p->position+1) = 0;
+		break;
+		
+	case SEARCH_FOUND:
+		printf("(WW) record already exists (%d)\n", p->position);
+	default:
+		freeNode(p->node);
+		free(p);
+		return -1;
+	}
 	
 	/* SPLIT */
 	
+	printf("(**) record has been inserted (%d)\n", p->position);
+	
+	saveNode(p->node);
 	freeNode(p->node);
 	free(p);
 	return 1;

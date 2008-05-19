@@ -30,4 +30,7 @@ void	saveNode(NODE* node);
 
 /* ********************************** *** *********************************** */
 
+int		insertRecord(BTREE* btree, void* record);
+
+
 #endif /*BTREELAYER_H_*/

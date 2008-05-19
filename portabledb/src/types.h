@@ -91,6 +91,12 @@ typedef struct
 }
 BTREESEARCH;
 
+#define	SEARCH_EMPTY		0
+#define SEARCH_FIRST		1
+#define	SEARCH_LAST			2
+#define	SEARCH_INSIDE		3
+#define	SEARCH_FOUND		4
+
 /******************************************************************************
  * 							HELPER MACROS									  *
  ******************************************************************************/

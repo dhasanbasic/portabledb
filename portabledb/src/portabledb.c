@@ -46,6 +46,8 @@ void prepareNew()
 	saveBtree(btree);
 	
 	node = allocateNode(btree);
+//	memcpy(MDATA(node), "AdisAlen", 8);
+//	MRECORDS(node) = 2;
 	saveNode(node);
 	
 	fclose(file);
@@ -55,6 +57,8 @@ void prepareNew()
 
 int main(void)
 {
+//	prepareNew();
+	
 	BTREE* btree = allocateBtree();
 	NODE* node;
 
@@ -62,14 +66,19 @@ int main(void)
 	btree->position = 3;
 	loadBtree(btree);
 
+	insertRecord(btree, "BBBB");
+	insertRecord(btree, "CCCC");
+	insertRecord(btree, "AAAA");
+	
 	node = allocateNode(btree);
+	node->position = MROOT(btree);
 	loadNode(node);
 	printNode(node);
-
+	
 	freeNode(node);
 	fclose(btree->file);
 	freeBtree(btree);
-	
+
 	return EXIT_SUCCESS;
 }
 
