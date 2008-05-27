@@ -3,34 +3,46 @@
 
 #include "types.h"
 
+#include <stdio.h>
+
 /* ************************************************************************** */
-/* 							   MEMORY OPERATIONS							  */
+/* 							   BTREE OPERATIONS							  */
 /* ************************************************************************** */
 
-void	createBtree(BTREE* btree, FILE*	file, const SINT	order,
-					const SINT	recordSize, const SINT	keyPosition,
-					const SINT	keySize);
+void	createBtree(BTREE*		btree,
+					FILE*		file,
+					const SHORT	degree,
+					const SHORT	recordLen,
+					const SHORT	keyPos,
+					const SHORT	keyLen);
+
 BTREE*	allocateBtree();
 void	freeBtree(BTREE* btree);
 
-NODE*	allocateNode(BTREE* btree);
-void	freeNode(NODE* node);
+void	readBtree(BTREE* btree);
+void	writeBtree(BTREE* btree);
+
+void	recursiveSearch(BTSEARCH* p);
+int		BtreeSearch(BTREE* btree, char* key, char* record);
+
+int		BtreeInsert(BTREE* btree, char* record);
 
 /* ********************************** *** *********************************** */
 
 /* ************************************************************************** */
-/* 							    FILE OPERATIONS								  */
+/* 							    BTNODE OPERATIONS							  */
 /* ************************************************************************** */
 
-void	loadBtree(BTREE* btree);
-void	saveBtree(BTREE* btree);
+BTNODE*	allocateNode(BTREE* btree);
+void	freeNode(BTNODE* node);
 
-void	loadNode(NODE* node);
-void	saveNode(NODE* node);
+char*	getRecord(BTREE* btree, BTNODE* node, SHORT position);
+char*	getKey(BTREE* btree, BTNODE* node, SHORT position);
+LONG	getChild(BTNODE* node, SHORT position);
+
+void	readNode(BTREE* btree, BTNODE* node);
+void	writeNode(BTREE* btree, BTNODE* node);
 
 /* ********************************** *** *********************************** */
-
-int		insertRecord(BTREE* btree, void* record);
-
 
 #endif /*BTREELAYER_H_*/

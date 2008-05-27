@@ -1,85 +1,37 @@
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include "btreelayer.h"
 
-
-void printNode(NODE* node)
-{
-	SINT i;
-	
-	printf(" records: %d\n", MRECORDS(node));
-	printf("    data: ");
-	
-	for(i=0; i<(MORDER(node->btree)*MRECSIZE(node->btree)); i++)
-		printf("%c",(MDATA(node)[i]!=0)?MDATA(node)[i]:'?');
-	
-	printf("\nsubnodes: ");
-	
-	for(i=0; i<(MORDER(node->btree)+1); i++)
-		printf("%d ", MSUBNODES(node)[i]);
-	
-	printf("\n");
-}
-
 void prepareNew()
 {
-	BTREE* btree;	
-	NODE* node;
+	BTREE* btree = allocateBtree();
 	FILE* file;
-
+	
 	remove("db.dat");
 	file = fopen("db.dat", "w+b");
-	
-	fputs("PDB", file);
-	
 	file = freopen("db.dat","r+b",file);
 	
-	btree = allocateBtree();
-	createBtree(btree, file, 3 , 4, 0, 2);
-	saveBtree(btree);
-	
-	fseek(file,0,SEEK_END);
-	btree->tag->rootPosition = ftell(file);
-	saveBtree(btree);
-	
-	node = allocateNode(btree);
-//	memcpy(MDATA(node), "AdisAlen", 8);
-//	MRECORDS(node) = 2;
-	saveNode(node);
-	
-	fclose(file);
-	freeNode(node);
+	createBtree(btree, file, 2, 8, 0, 4);
 	freeBtree(btree);
+	fclose(file);
 }
 
 int main(void)
 {
 //	prepareNew();
 	
+	FILE* file = fopen("db.dat","r+b");
 	BTREE* btree = allocateBtree();
-	NODE* node;
-
-	btree->file = fopen("db.dat","r+b");
-	btree->position = 3;
-	loadBtree(btree);
-
-	insertRecord(btree, "BBBB");
-	insertRecord(btree, "CCCC");
-	insertRecord(btree, "AAAA");
 	
-	node = allocateNode(btree);
-	node->position = MROOT(btree);
-	loadNode(node);
-	printNode(node);
+	btree->file = file;
+	btree->position = 0;
+	readBtree(btree);
 	
-	freeNode(node);
-	fclose(btree->file);
+	printf("%d\n", BtreeSearch(btree, "Dink", NULL));
+
 	freeBtree(btree);
+	fclose(file);
 
-	return EXIT_SUCCESS;
+	return 0;
 }
-
-
