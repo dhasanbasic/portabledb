@@ -49,9 +49,8 @@ typedef struct {
 	BTREE*	btree;
 	BTNODE*	node;
 	char*	key;
-	SHORT	position;
-	int		result;
-} BTSEARCH;
+	char*	record;
+} BTPARAM;
 
 #define SEARCH_FOUND		1
 #define SEARCH_NOTFOUND		0

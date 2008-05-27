@@ -82,7 +82,7 @@ void	writeBtree(BTREE* btree)
 /* 							     B-TREE SEARCH								  */
 /* ************************************************************************** */
 
-void	recursiveSearch(BTSEARCH* p)
+int		recursiveSearch(BTPARAM* p)
 {
 	SHORT i = 1;
 	
@@ -93,16 +93,12 @@ void	recursiveSearch(BTSEARCH* p)
 	if(i <= NRECNUM(p->node)
 		&& memcmp(p->key, getKey(p->btree,p->node,i), BKEYLEN(p->btree) == 0))
 	{
-		p->position = i;
-		p->result = SEARCH_FOUND;
-		return;
+		memcpy(p->record, getRecord(p->btree,p->node, i), BRECLEN(p->btree));
+		return SEARCH_FOUND;
 	}
 	
 	if(NLEAF(p->node) > 0)
-	{
-		p->result = SEARCH_NOTFOUND;
-		return;
-	}
+		return SEARCH_NOTFOUND;
 	else
 	{
 		p->node->position = getChild(p->node,i);
@@ -110,31 +106,32 @@ void	recursiveSearch(BTSEARCH* p)
 		recursiveSearch(p);
 	}
 	
-	p->result = SEARCH_NOTFOUND;
+	return SEARCH_NOTFOUND;
 }
 
 int		BtreeSearch(BTREE* btree, char* key, char* record)
 {
-	BTSEARCH* p = (BTSEARCH*)malloc(sizeof(BTSEARCH));
+	BTPARAM* p = (BTPARAM*)malloc(sizeof(BTPARAM));
+	int result;
 	
 	p->btree = btree;
 	p->key = key;
-	p->node = allocateNode(btree);
+	p->record = record;
 	
 	/* make a copy of the root node */
+	p->node = allocateNode(btree);
+	
 	NLEAF(p->node) = NLEAF(btree->root);
 	NRECNUM(p->node) = NRECNUM(btree->root);
 	memcpy(NRECORDS(p->node), NRECORDS(btree->root), BMAXREC(btree) * BRECLEN(btree));
 	memcpy(NCHILDREN(p->node), NCHILDREN(btree->root), BDEGREE(btree)*2*sizeof(LONG));
 	
-	recursiveSearch(p);
-	
-	if(p->result == SEARCH_FOUND)
-		memcpy(record, getRecord(btree, p->node, p->position), BRECLEN(btree));
+	result = recursiveSearch(p);
 	
 	freeNode(p->node);
+	free(p);
 	
-	return p->result;
+	return result;
 }
 
 /* ********************************** *** *********************************** */

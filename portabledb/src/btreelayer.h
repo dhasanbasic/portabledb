@@ -22,7 +22,7 @@ void	freeBtree(BTREE* btree);
 void	readBtree(BTREE* btree);
 void	writeBtree(BTREE* btree);
 
-void	recursiveSearch(BTSEARCH* p);
+int		recursiveSearch(BTPARAM* p);
 int		BtreeSearch(BTREE* btree, char* key, char* record);
 
 int		BtreeInsert(BTREE* btree, char* record);
