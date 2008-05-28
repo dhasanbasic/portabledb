@@ -12,8 +12,8 @@
 BTREE* TreeRead(FILE* file, LONG position);
 void TreeWrite(BTREE* btree);
 
-//int		recursiveSearch(BTPARAM* p);
-//int		BtreeSearch(BTREE* btree, char* key, char* record);
+int	TreeSearch(BTREE* btree, char* key, char* record);
+int	SearchRecursive(BTPARAM* p);
 
 //int		BtreeInsert(BTREE* btree, char* record);
 

@@ -40,7 +40,7 @@ typedef struct {
 #define NLEN(node)			node->meta->nodeLength
 
 #define LEAF(node)			*((SHORT*)node->leaf)
-#define COUNT(node)			*((SHORT*)node->recordNumber)
+#define COUNT(node)			*((SHORT*)node->recordCount)
 #define CHILD(node,i)		*((LONG*)(node->children + i*sizeof(LONG)))
 
 #define RECORD_PTR(node,i)	node->records + i*RLEN(node)
@@ -71,19 +71,17 @@ BTREE*	TreeCreate(FILE* file, SHORT degree, SHORT recordLength,
 
 void	TreeFree(BTREE* btree);
 
-/*
+/******************************************************************************
+ * 					   B-TREE OPERATION PARAMETER STRUCTURE				  	  *
+ ******************************************************************************/
 
 typedef struct {
-	BTREE*	btree;
-	BTNODE*	node;
+	BNODE*	node;
 	char*	key;
 	char*	record;
 } BTPARAM;
 
-
 #define SEARCH_FOUND		1
 #define SEARCH_NOTFOUND		0
-
-*/
 
 #endif /*TYPES_H_*/

@@ -1,5 +1,6 @@
 
 #include <stdio.h>
+#include <string.h>
 
 #include "btreelayer.h"
 
@@ -23,13 +24,25 @@ void prepareNew()
 
 int main(void)
 {
+	int result;
+	char record[8];
+	char* key = "XSSS";
+	
 //	prepareNew();
 	
 	FILE* file = fopen("db.dat","r+b");
 
 	BTREE* btree = TreeRead(file, 0);
 	
-	//
+	memcpy(btree->root->records, "A_RecordB_RecordC_Record", 24);
+	COUNT(btree->root) = 3;
+	
+	result = TreeSearch(btree, key, record);
+	
+	if(result == SEARCH_FOUND)
+		printf("Record[%s] was found: %s\n", key, record);
+	else
+		printf("Record[%s] was not found!\n", key);
 	
 	TreeFree(btree);
 	fclose(file);
