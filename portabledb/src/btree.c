@@ -6,74 +6,31 @@
 #include <malloc.h>
 
 /* ************************************************************************** */
-/* 							   MEMORY OPERATIONS							  */
+/* 							    FILE OPERATIONS								  */
 /* ************************************************************************** */
 
-void	createBtree(BTREE*		btree,
-					FILE*		file,
-					const SHORT	degree,
-					const SHORT	recordLen,
-					const SHORT	keyPos,
-					const SHORT	keyLen)
-{
-	btree->file 			= file;
-	
-	fseek(file, 0, SEEK_END);
-	
-	btree->position 		= ftell(file);
-	
-	btree->data->degree		= degree;
-	btree->data->recordLen	= recordLen;
-	btree->data->keyPos		= keyPos;
-	btree->data->keyLen		= keyLen;
-	btree->data->rootPos	= btree->position + sizeof(BTREEDATA);
-	
-	btree->root				= allocateNode(btree);
-	btree->root->position	= btree->data->rootPos;
-	NLEAF(btree->root)		= 1;
-	
-	writeBtree(btree);
-	writeNode(btree, btree->root);
-}
-
-BTREE*	allocateBtree()
+BTREE* TreeRead(FILE* file, LONG position)
 {
 	BTREE* btree	= (BTREE*)malloc(sizeof(BTREE));
 	
-	btree->data		= (BTREEDATA*)malloc(sizeof(BTREEDATA));
-	btree->position = 0;
-	btree->file		= 0;
-	btree->root		= 0;
+	btree->meta		= (BTREEMETA*)malloc(sizeof(BTREEMETA));
+	btree->file		= file;
+	btree->position	= position;
+	
+	fseek(file, position, SEEK_SET);
+	fread(btree->meta,sizeof(BTREEMETA),1,file);
+	btree->root->position = btree->meta->rootPosition;
+	
+	btree->root = NodeAllocate(btree);
+	NodeRead(btree->root);
 	
 	return btree;
 }
 
-void	freeBtree(BTREE* btree)
-{
-	freeNode(btree->root);
-	free(btree->data);
-	free(btree);
-}
-
-/* ********************************** *** *********************************** */
-
-/* ************************************************************************** */
-/* 							    FILE OPERATIONS								  */
-/* ************************************************************************** */
-
-void	readBtree(BTREE* btree)
+void TreeWrite(BTREE* btree)
 {
 	fseek(btree->file, btree->position, SEEK_SET);
-	fread(btree->data,sizeof(BTREEDATA),1,btree->file);
-	btree->root = allocateNode(btree);
-	btree->root->position = btree->data->rootPos;
-	readNode(btree,btree->root);
-}
-
-void	writeBtree(BTREE* btree)
-{
-	fseek(btree->file, btree->position, SEEK_SET);
-	fwrite(btree->data,sizeof(BTREEDATA),1,btree->file);
+	fwrite(btree->meta,sizeof(BTREEMETA),1,btree->file);
 }
 
 /* ********************************** *** *********************************** */
@@ -81,7 +38,7 @@ void	writeBtree(BTREE* btree)
 /* ************************************************************************** */
 /* 							     B-TREE SEARCH								  */
 /* ************************************************************************** */
-
+/*
 int		recursiveSearch(BTPARAM* p)
 {
 	SHORT i = 1;
@@ -108,7 +65,8 @@ int		recursiveSearch(BTPARAM* p)
 	
 	return SEARCH_NOTFOUND;
 }
-
+*/
+/*
 int		BtreeSearch(BTREE* btree, char* key, char* record)
 {
 	BTPARAM* p = (BTPARAM*)malloc(sizeof(BTPARAM));
@@ -119,7 +77,7 @@ int		BtreeSearch(BTREE* btree, char* key, char* record)
 	p->record = record;
 	
 	/* make a copy of the root node */
-	p->node = allocateNode(btree);
+/*	p->node = allocateNode(btree);
 	
 	NLEAF(p->node) = NLEAF(btree->root);
 	NRECNUM(p->node) = NRECNUM(btree->root);
@@ -133,16 +91,16 @@ int		BtreeSearch(BTREE* btree, char* key, char* record)
 	
 	return result;
 }
-
+*/
 /* ********************************** *** *********************************** */
 
 /* ************************************************************************** */
 /* 							   B-TREE INSERTION								  */
 /* ************************************************************************** */
-
+/*
 int		BtreeInsert(BTREE* btree, char* record)
 {
 	return 0;
 }
-
+*/
 /* ********************************** *** *********************************** */

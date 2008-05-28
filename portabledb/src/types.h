@@ -7,43 +7,71 @@ typedef unsigned short int	SHORT;
 typedef long int			LONG;
 
 /******************************************************************************
- * 							    DATA STRUCTURES								  *
+ *				  		DATA STRUCTURES, HELPER MACROS						  *
  ******************************************************************************/
 
 typedef struct {
-	SHORT	degree;		/* minimum number of child nodes */
-	SHORT	keyPos;
-	SHORT	keyLen;
-	SHORT	recordLen;
-	LONG	rootPos;
-} BTREEDATA;
+	SHORT	degree;			/* minimum number of child nodes */
+	SHORT	minRecords;
+	SHORT	maxRecords;
+	SHORT	keyPosition;
+	SHORT	keyLength;
+	SHORT	recordLength;
+	SHORT	nodeLength;
+	LONG	rootPosition;
+} BTREEMETA;
 
 typedef struct {
-	char	isLeaf;
-	SHORT	recordNum;
-	char*	records;
-	LONG*	children;
-} BTNODEDATA;
-
-/******************************************************************************
- * 							 IN-MEMORY DATA STRUCTURES						  *
- ******************************************************************************/
-
-typedef struct {
-	BTNODEDATA*	data;
-	LONG		position;
-} BTNODE;
-
-typedef struct {
-	BTREEDATA* 	data;
+	char*		leaf;
+	char*		recordCount;
+	char*		records;
+	char*		children;
+	BTREEMETA*	meta;
+	char*		data;
 	FILE*		file;
 	LONG		position;
-	BTNODE*		root;
+} BNODE;
+
+#define RLEN(node)			node->meta->recordLength
+#define RMIN(node)			node->meta->minRecords
+#define RMAX(node)			node->meta->maxRecords
+#define KPOS(node)			node->meta->keyPosition
+#define KLEN(node)			node->meta->keyLength
+#define NLEN(node)			node->meta->nodeLength
+
+#define LEAF(node)			*((SHORT*)node->leaf)
+#define COUNT(node)			*((SHORT*)node->recordNumber)
+#define CHILD(node,i)		*((LONG*)(node->children + i*sizeof(LONG)))
+
+#define RECORD_PTR(node,i)	node->records + i*RLEN(node)
+#define KEY_PTR(node,i)		RECORD_PTR(node,i) + KPOS(node)
+#define CHILD_PTR(node,i)	node->children + i*sizeof(LONG)
+
+typedef struct {
+	BTREEMETA*	meta;
+	FILE*		file;
+	LONG		position;
+	BNODE*		root;
 } BTREE;
 
 /******************************************************************************
- * 					   B-TREE OPERATIONAL DATA STRUCTURES					  *
+ * 					   		  ALLOCATION, DEALLOCATION					  	  *
  ******************************************************************************/
+
+void	NodeInit(BNODE* node);
+
+BNODE*	NodeAllocate(BTREE* btree);
+
+void	NodeFree(BNODE* node);
+
+BTREE*	TreeAllocate();
+
+BTREE*	TreeCreate(FILE* file, SHORT degree, SHORT recordLength,
+		           SHORT keyPosition, SHORT keyLength);
+
+void	TreeFree(BTREE* btree);
+
+/*
 
 typedef struct {
 	BTREE*	btree;
@@ -52,30 +80,10 @@ typedef struct {
 	char*	record;
 } BTPARAM;
 
+
 #define SEARCH_FOUND		1
 #define SEARCH_NOTFOUND		0
 
-/******************************************************************************
- * 							     HELPER MACROS								  *
- ******************************************************************************/
-
-/**
- * B-tree macros
- */
-#define BDEGREE(b)		b->data->degree
-#define BMINREC(b)		(BDEGREE(b)-1)
-#define BMAXREC(b)		(BDEGREE(b)*2-1)
-#define BKEYPOS(b)		b->data->keyPos
-#define BKEYLEN(b)		b->data->keyLen
-#define BRECLEN(b)		b->data->recordLen
-#define BROOT(b)		b->data->rootPos
-
-/**
- * Node macros
- */
-#define NRECNUM(n)		n->data->recordNum
-#define NRECORDS(n)		n->data->records
-#define NCHILDREN(n)	n->data->children
-#define NLEAF(n)		n->data->isLeaf
+*/
 
 #endif /*TYPES_H_*/

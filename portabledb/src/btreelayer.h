@@ -9,23 +9,13 @@
 /* 							   BTREE OPERATIONS							  */
 /* ************************************************************************** */
 
-void	createBtree(BTREE*		btree,
-					FILE*		file,
-					const SHORT	degree,
-					const SHORT	recordLen,
-					const SHORT	keyPos,
-					const SHORT	keyLen);
+BTREE* TreeRead(FILE* file, LONG position);
+void TreeWrite(BTREE* btree);
 
-BTREE*	allocateBtree();
-void	freeBtree(BTREE* btree);
+//int		recursiveSearch(BTPARAM* p);
+//int		BtreeSearch(BTREE* btree, char* key, char* record);
 
-void	readBtree(BTREE* btree);
-void	writeBtree(BTREE* btree);
-
-int		recursiveSearch(BTPARAM* p);
-int		BtreeSearch(BTREE* btree, char* key, char* record);
-
-int		BtreeInsert(BTREE* btree, char* record);
+//int		BtreeInsert(BTREE* btree, char* record);
 
 /* ********************************** *** *********************************** */
 
@@ -33,15 +23,8 @@ int		BtreeInsert(BTREE* btree, char* record);
 /* 							    BTNODE OPERATIONS							  */
 /* ************************************************************************** */
 
-BTNODE*	allocateNode(BTREE* btree);
-void	freeNode(BTNODE* node);
-
-char*	getRecord(BTREE* btree, BTNODE* node, SHORT position);
-char*	getKey(BTREE* btree, BTNODE* node, SHORT position);
-LONG	getChild(BTNODE* node, SHORT position);
-
-void	readNode(BTREE* btree, BTNODE* node);
-void	writeNode(BTREE* btree, BTNODE* node);
+void NodeRead(BNODE* node);
+void NodeWrite(BNODE* node);
 
 /* ********************************** *** *********************************** */
 
