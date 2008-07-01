@@ -11,7 +11,7 @@
 #include <stdio.h>
 
 /* ************************************************************************* */
-/*                             Meta-data structures
+/*                             Meta-data structures                          */
 /* ************************************************************************* */
 
 typedef struct {
@@ -62,7 +62,7 @@ void calculateNodeMeta(BtMeta* btmeta, BtNodeMeta* btnodemeta)
 /* ************************************************************************* */
 
 /* ************************************************************************* */
-/*                           B-tree node structure
+/*                           B-tree node structure                           */
 /* ************************************************************************* */
 
 typedef struct {
@@ -99,18 +99,31 @@ void setLeaf(const BtNode* node, const unsigned short int value)
 	*((unsigned short int*)(node->data + node->meta->posLeaf)) = value;
 }
 
+unsigned short int getCount(const BtNode* node)
+{
+	return *((unsigned short int*)(node->data + node->meta->posCount));
+}
+
+void setCount(const BtNode* node, const unsigned short int value)
+{
+	*((unsigned short int*)(node->data + node->meta->posCount)) = value;
+}
+
 /* ************************************************************************* */
 
 /* ************************************************************************* */
-/*                           B-tree data structure
+/*                           B-tree data structure                           */
 /* ************************************************************************* */
 
 typedef struct {
 
-	char*			data;
-	BtNodeMeta*		meta;
+	BtMeta*			meta;
+	BtNodeMeta*		nodemeta;
+	BtNode*			root;
+	long int*		freelist;
+	FILE*			file;
 
-} BtNode;
+} BtTree;
 
 /* ************************************************************************* */
 
