@@ -10,6 +10,9 @@
 
 #include <stdio.h>
 
+#define CHILD	0
+#define LEAF	1
+
 /* ************************************************************************* */
 /*                             Meta-data structures                          */
 /* ************************************************************************* */
@@ -42,22 +45,7 @@ typedef struct {
 } BtNodeMeta;
 
 
-void calculateNodeMeta(BtMeta* btmeta, BtNodeMeta* btnodemeta)
-{
-	btnodemeta->minRecords	= btmeta->order - 1;
-	btnodemeta->maxRecords	= btmeta->order*2 - 1;
-	btnodemeta->posChildren	= btnodemeta->maxRecords * btmeta->recordLength;
-
-	btnodemeta->posLeaf		= btnodemeta->posChildren
-		+ (btnodemeta->maxRecords + 1)*sizeof(long int);
-
-	btnodemeta->posCount	= btnodemeta->posLeaf + sizeof(long int);
-	btnodemeta->nodeLength	= btnodemeta->posCount + sizeof(long int);
-
-	btnodemeta->recordLength	= btmeta->recordLength;
-	btnodemeta->keyPosition		= btmeta->keyPosition;
-	btnodemeta->keyLength		= btmeta->keyLength;
-}
+void calculateNodeMeta(BtMeta* btmeta, BtNodeMeta* btnodemeta);
 
 /* ************************************************************************* */
 
@@ -72,42 +60,17 @@ typedef struct {
 
 } BtNode;
 
-char* getRecord(const BtNode* node, const unsigned short int position)
-{
-	return (char*)(node->data + (position-1)*node->meta->recordLength);
-}
+char* getRecord(const BtNode* node, const unsigned short int position);
 
-char* getKey(const BtNode* node, const unsigned short int position)
-{
-	return (char*)(node->data + (position-1)*node->meta->recordLength
-			+ node->meta->keyPosition);
-}
+char* getKey(const BtNode* node, const unsigned short int position);
 
-long int* getChild(const BtNode* node, const unsigned short int position)
-{
-	return (long int*)(node->data + node->meta->posChildren
-			+ (position-1)*sizeof(long int));
-}
+long int* getChild(const BtNode* node, const unsigned short int position);
 
-unsigned short int isLeaf(const BtNode* node)
-{
-	return *((unsigned short int*)(node->data + node->meta->posLeaf));
-}
+unsigned short int getLeaf(const BtNode* node);
+void setLeaf(const BtNode* node, const unsigned short int value);
 
-void setLeaf(const BtNode* node, const unsigned short int value)
-{
-	*((unsigned short int*)(node->data + node->meta->posLeaf)) = value;
-}
-
-unsigned short int getCount(const BtNode* node)
-{
-	return *((unsigned short int*)(node->data + node->meta->posCount));
-}
-
-void setCount(const BtNode* node, const unsigned short int value)
-{
-	*((unsigned short int*)(node->data + node->meta->posCount)) = value;
-}
+unsigned short int getCount(const BtNode* node);
+void setCount(const BtNode* node, const unsigned short int value);
 
 /* ************************************************************************* */
 
