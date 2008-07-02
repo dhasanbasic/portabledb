@@ -18,8 +18,6 @@ BtTree*	CreateTree(
 			const unsigned short int	keyLength,
 			const unsigned short int	freelistSize)
 {
-	long int position;
-
 	BtTree*  tree;
 
 	/* allocate the meta-data structures */
@@ -35,6 +33,9 @@ BtTree*	CreateTree(
 	tree->meta->freelistSize	= freelistSize;
 	tree->meta->freeNodes		= 0;
 
+	/* fill in the node meta-data */
+	CalculateNodeMeta(tree->meta, tree->nodemeta);
+
 	/* allocate the free nodes list */
 	tree->freelist = (long int*)malloc(freelistSize*sizeof(long int));
 
@@ -44,16 +45,16 @@ BtTree*	CreateTree(
 
 	/* fill in the root node */
 	tree->root->meta	= tree->nodemeta;
-	setCount(tree->root, 0);
-	setLeaf(tree->root, CHILD);
+	SetCount(tree->root, 0);
+	SetLeaf(tree->root, CHILD);
 
 	/* determine the positions of the structure in the file */
 	tree->file = file;
 	fseek(file,0,SEEK_END);
-	position = ftell(file);
 
-	tree->meta->freelistPosition = position + sizeof(BtMeta);
-	tree->meta->rootPosition = position + sizeof(BtMeta)
+	tree->position = ftell(file);
+	tree->meta->freelistPosition = tree->position + sizeof(BtMeta);
+	tree->meta->rootPosition = tree->position + sizeof(BtMeta)
 		+ freelistSize*sizeof(long int);
 
 	/* save the structures */

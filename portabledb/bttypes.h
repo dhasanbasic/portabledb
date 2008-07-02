@@ -45,7 +45,7 @@ typedef struct {
 } BtNodeMeta;
 
 
-void calculateNodeMeta(BtMeta* btmeta, BtNodeMeta* btnodemeta);
+void CalculateNodeMeta(BtMeta* btmeta, BtNodeMeta* btnodemeta);
 
 /* ************************************************************************* */
 
@@ -60,17 +60,17 @@ typedef struct {
 
 } BtNode;
 
-char* getRecord(const BtNode* node, const unsigned short int position);
+char* GetRecord(const BtNode* node, const unsigned short int position);
 
-char* getKey(const BtNode* node, const unsigned short int position);
+char* GetKey(const BtNode* node, const unsigned short int position);
 
-long int* getChild(const BtNode* node, const unsigned short int position);
+long int* GetChild(const BtNode* node, const unsigned short int position);
 
-unsigned short int getLeaf(const BtNode* node);
-void setLeaf(const BtNode* node, const unsigned short int value);
+unsigned short int GetLeaf(const BtNode* node);
+void SetLeaf(const BtNode* node, const unsigned short int value);
 
-unsigned short int getCount(const BtNode* node);
-void setCount(const BtNode* node, const unsigned short int value);
+unsigned short int GetCount(const BtNode* node);
+void SetCount(const BtNode* node, const unsigned short int value);
 
 /* ************************************************************************* */
 
@@ -85,6 +85,7 @@ typedef struct {
 	BtNode*			root;
 	long int*		freelist;
 	FILE*			file;
+	long int		position;
 
 } BtTree;
 
