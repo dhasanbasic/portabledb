@@ -6,6 +6,7 @@
  */
 
 #include <stdio.h>
+#include <malloc.h>
 
 #include "btree.h"
 
@@ -18,19 +19,8 @@ void PrepareNewDb()
 	fclose(file);
 }
 
-int main(void)
+void PrintTreeMeta(const BtTree* tree)
 {
-	FILE* file;
-	BtTree* tree;
-
-	printf("PortableDB Version 0.1\n------------------------\n\n");
-
-	PrepareNewDb();
-
-	file = fopen("db.dat","r+b");
-
-	tree = CreateTree(file,2,16,0,4,2);
-
 	printf("position\t\t: %ld\n", tree->position);
 	printf("freelistPosition\t: %ld\n", tree->meta->freelistPosition);
 	printf("rootPosition\t\t: %ld\n", tree->meta->rootPosition);
@@ -41,12 +31,55 @@ int main(void)
 	printf("posChildren\t\t: %u\n", tree->nodemeta->posChildren);
 	printf("posLeaf\t\t\t: %u\n", tree->nodemeta->posLeaf);
 	printf("posCount\t\t: %u\n", tree->nodemeta->posCount);
+}
 
-	printf("u. short\t\t: %u\n", sizeof(unsigned short int));
-	printf("long int\t\t: %u\n", sizeof(long int));
+/*
+int main(void)
+{
+	FILE* file;
+	BtTree* tree;
 
+	PrepareNewDb();
+
+	printf("PortableDB Version 0.1\n------------------------\n\n");
+
+	file = fopen("db.dat","r+b");
+
+		tree = CreateTree(file,2,16,0,4,2);
+		PrintTreeMeta();
 
 	fclose(file);
+
+	return 0;
+}
+*/
+
+int main(void)
+{
+	BtTree* tree;
+
+	printf("PortableDB Version 0.1\n------------------------\n\n");
+
+	tree = (BtTree*)malloc(sizeof(BtTree));
+
+	tree->file = fopen("db.dat","r+b");
+	tree->position = 0;
+
+	ReadTree(tree);
+	PrintTreeMeta(tree);
+
+	printf("root.leaf  = %u\n", GetLeaf(tree->root));
+	printf("root.count = %u\n", GetCount(tree->root));
+
+	/* deallocate the tree */
+	free(tree->root->data);
+	free(tree->root);
+	free(tree->meta);
+	free(tree->nodemeta);
+	free(tree->freelist);
+	free(tree);
+
+	fclose(tree->file);
 
 	return 0;
 }

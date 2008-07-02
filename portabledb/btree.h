@@ -23,13 +23,9 @@ BtTree*	CreateTree(
 			const unsigned short int	keyLength,
 			const unsigned short int	freelistSize);
 
-void	WriteTree(
-			const BtTree*	tree,
-			const long int	position);
+void	WriteTree(const BtTree*	tree);
 
-void	ReadTree(
-			const BtTree*	tree,
-			const long int	position);
+void	ReadTree(BtTree* tree);
 
 /* ************************************************************************* */
 

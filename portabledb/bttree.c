@@ -64,12 +64,45 @@ BtTree*	CreateTree(
 
 	return tree;
 }
-/*
-void	WriteTree(
-			const BtTree*	tree,
-			const long int	position);
 
-void	ReadTree(
-			const BtTree*	tree,
-			const long int	position);
-*/
+
+void	WriteTree(const BtTree*	tree)
+{
+	fseek(tree->file, tree->position, SEEK_SET);
+	fwrite(tree->meta,sizeof(BtMeta),1,tree->file);
+
+	fseek(tree->file, tree->meta->freelistPosition, SEEK_SET);
+	fwrite(tree->freelist, sizeof(long int),
+			tree->meta->freelistSize, tree->file);
+
+	fseek(tree->file, tree->meta->rootPosition, SEEK_SET);
+	fwrite(tree->root->data, tree->nodemeta->nodeLength, 1, tree->file);
+}
+
+void	ReadTree(BtTree* tree)
+{
+	/* allocate the meta-data structures */
+	tree->meta		= (BtMeta*)malloc(sizeof(BtMeta));
+	tree->nodemeta	= (BtNodeMeta*)malloc(sizeof(BtNodeMeta));
+
+	/* fill in the meta-data structures */
+	fseek(tree->file, tree->position, SEEK_SET);
+	fread(tree->meta,sizeof(BtMeta),1,tree->file);
+	CalculateNodeMeta(tree->meta, tree->nodemeta);
+
+	/* create and fill the free list */
+	tree->freelist = (long int*)
+		malloc(tree->meta->freelistSize*sizeof(long int));
+
+	fseek(tree->file, tree->meta->freelistPosition, SEEK_SET);
+	fread(tree->freelist, sizeof(long int),
+			tree->meta->freelistSize, tree->file);
+
+	/* create and fill in the root node */
+	tree->root			= (BtNode*)malloc(sizeof(BtNode));
+	tree->root->data	= (char*)malloc(tree->nodemeta->nodeLength);
+	tree->root->meta	= tree->nodemeta;
+
+	fseek(tree->file, tree->meta->rootPosition, SEEK_SET);
+	fread(tree->root->data, tree->nodemeta->nodeLength, 1, tree->file);
+}
