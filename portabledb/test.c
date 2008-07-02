@@ -33,27 +33,6 @@ void PrintTreeMeta(const BtTree* tree)
 	printf("posCount\t\t: %u\n", tree->nodemeta->posCount);
 }
 
-/*
-int main(void)
-{
-	FILE* file;
-	BtTree* tree;
-
-	PrepareNewDb();
-
-	printf("PortableDB Version 0.1\n------------------------\n\n");
-
-	file = fopen("db.dat","r+b");
-
-		tree = CreateTree(file,2,16,0,4,2);
-		PrintTreeMeta();
-
-	fclose(file);
-
-	return 0;
-}
-*/
-
 int main(void)
 {
 	BtTree* tree;
@@ -66,10 +45,12 @@ int main(void)
 	tree->position = 0;
 
 	ReadTree(tree);
-	PrintTreeMeta(tree);
 
-	printf("root.leaf  = %u\n", GetLeaf(tree->root));
-	printf("root.count = %u\n", GetCount(tree->root));
+	/*                            BEGIN - TESTS                           */
+
+
+
+	/*                             END - TESTS                            */
 
 	/* deallocate the tree */
 	free(tree->root->data);

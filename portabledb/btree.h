@@ -12,7 +12,7 @@
 #include <stdio.h>
 
 /* ************************************************************************* */
-/*                        B-tree functions structures                        */
+/*                              B-tree functions                             */
 /* ************************************************************************* */
 
 BtTree*	CreateTree(
@@ -29,5 +29,16 @@ void	ReadTree(BtTree* tree);
 
 /* ************************************************************************* */
 
+/* ************************************************************************* */
+/*                              Node functions                             */
+/* ************************************************************************* */
+
+BtNode*	AllocateNode(BtNodeMeta* nodemeta);
+
+void	WriteNode(FILE* file, BtNode* node, const long int position);
+
+void	ReadNode(FILE* file, BtNode* node, const long int position);
+
+/* ************************************************************************* */
 
 #endif /* BTREE_H_ */

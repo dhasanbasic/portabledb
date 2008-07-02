@@ -40,15 +40,13 @@ BtTree*	CreateTree(
 	tree->freelist = (long int*)malloc(freelistSize*sizeof(long int));
 
 	/* allocate the root node */
-	tree->root			= (BtNode*)malloc(sizeof(BtNode));
-	tree->root->data	= (char*)malloc(tree->nodemeta->nodeLength);
+	tree->root = AllocateNode(tree->nodemeta);
 
 	/* fill in the root node */
-	tree->root->meta	= tree->nodemeta;
 	SetCount(tree->root, 0);
 	SetLeaf(tree->root, CHILD);
 
-	/* determine the positions of the structure in the file */
+	/* determine the positions of the structures in the file */
 	tree->file = file;
 	fseek(file,0,SEEK_END);
 
