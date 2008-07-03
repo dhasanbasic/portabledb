@@ -7,74 +7,61 @@
 
 #include "bttypes.h"
 
-void CalculateNodeMeta(BtMeta* btmeta, BtNodeMeta* btnodemeta)
+void CalculateNodeMeta(BtTree* tree)
 {
-	btnodemeta->minRecords	= btmeta->order - 1;
-	btnodemeta->maxRecords	= btmeta->order*2 - 1;
-	btnodemeta->posChildren	= btnodemeta->maxRecords * btmeta->recordLength;
+	tree->minRecords	= tree->meta->order - 1;
+	tree->maxRecords	= tree->meta->order*2 - 1;
+	tree->posChildren	= tree->maxRecords * tree->meta->recordLength;
 
-	btnodemeta->posLeaf		= btnodemeta->posChildren
-		+ (btnodemeta->maxRecords + 1)*sizeof(LONG);
+	tree->posLeaf		= tree->posChildren + (tree->maxRecords+1)*sizeof(LONG);
 
-	btnodemeta->posCount	= btnodemeta->posLeaf + sizeof(SHORT);
-	btnodemeta->nodeLength	= btnodemeta->posCount + sizeof(SHORT);
-
-	btnodemeta->recordLength	= btmeta->recordLength;
-	btnodemeta->keyPosition		= btmeta->keyPosition;
-	btnodemeta->keyLength		= btmeta->keyLength;
+	tree->posCount		= tree->posLeaf + sizeof(SHORT);
+	tree->nodeLength	= tree->posCount + sizeof(SHORT);
 }
 
 char* GetRecord(
-		const BtNodeMeta* nodemeta,
 		const BtNode* node,
 		const SHORT index)
 {
-	return (char*)(node->data + (index-1)*nodemeta->recordLength);
+	return (char*)(node->data + (index-1)*node->tree->meta->recordLength);
 }
 
 char* GetKey(
-		const BtNodeMeta* nodemeta,
 		const BtNode* node,
 		const SHORT index)
 {
-	return (char*)(node->data + (index-1)*nodemeta->recordLength
-			+ nodemeta->keyPosition);
+	return (char*)(node->data + (index-1)*node->tree->meta->recordLength
+			+ node->tree->meta->keyPosition);
 }
 
 LONG* GetChild(
-		const BtNodeMeta* nodemeta,
 		const BtNode* node,
 		const SHORT index)
 {
-	return (LONG*)(node->data + nodemeta->posChildren + (index-1)*sizeof(LONG));
+	return (LONG*)(node->data + node->tree->posChildren
+			+ (index-1)*sizeof(LONG));
 }
 
-SHORT GetLeaf(
-		const BtNodeMeta* nodemeta,
-		const BtNode* node)
+SHORT GetLeaf(const BtNode* node)
 {
-	return *((SHORT*)(node->data + nodemeta->posLeaf));
+	return *((SHORT*)(node->data + node->tree->posLeaf));
 }
 
 void SetLeaf(
-		const BtNodeMeta* nodemeta,
 		const BtNode* node,
 		const SHORT value)
 {
-	*((SHORT*)(node->data + nodemeta->posLeaf)) = value;
+	*((SHORT*)(node->data + node->tree->posLeaf)) = value;
 }
 
-SHORT GetCount(
-		const BtNodeMeta* nodemeta,
-		const BtNode* node)
+SHORT GetCount(const BtNode* node)
 {
-	return *((SHORT*)(node->data + nodemeta->posCount));
+	return *((SHORT*)(node->data + node->tree->posCount));
 }
 
 void SetCount(
-		const BtNodeMeta* nodemeta,
 		const BtNode* node,
 		const SHORT value)
 {
-	*((SHORT*)(node->data + nodemeta->posCount)) = value;
+	*((SHORT*)(node->data + node->tree->posCount)) = value;
 }

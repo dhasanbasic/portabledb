@@ -18,7 +18,7 @@ void PrepareNewDb()
 	remove("db.dat");
 	file = fopen("db.dat","wb");
 	file = freopen("db.dat", "r+b", file);
-	tree = CreateTree(file,2,16,0,4,2);
+	tree = CreateTree(file,2,1,0,1,2);
 	fclose(file);
 }
 
@@ -28,17 +28,18 @@ void PrintTreeMeta(const BtTree* tree)
 	printf("freelistPosition\t: %ld\n", tree->meta->freelistPosition);
 	printf("rootPosition\t\t: %ld\n", tree->meta->rootPosition);
 
-	printf("nodeLength\t\t: %u\n", tree->nodemeta->nodeLength);
-	printf("minRecords\t\t: %u\n", tree->nodemeta->minRecords);
-	printf("maxRecords\t\t: %u\n", tree->nodemeta->maxRecords);
-	printf("posChildren\t\t: %u\n", tree->nodemeta->posChildren);
-	printf("posLeaf\t\t\t: %u\n", tree->nodemeta->posLeaf);
-	printf("posCount\t\t: %u\n", tree->nodemeta->posCount);
+	printf("nodeLength\t\t: %u\n", tree->nodeLength);
+	printf("minRecords\t\t: %u\n", tree->minRecords);
+	printf("maxRecords\t\t: %u\n", tree->maxRecords);
+	printf("posChildren\t\t: %u\n", tree->posChildren);
+	printf("posLeaf\t\t\t: %u\n", tree->posLeaf);
+	printf("posCount\t\t: %u\n", tree->posCount);
 }
 
 int main(void)
 {
 	BtTree* tree;
+	BtNode* root;
 
 	printf("PortableDB Version 0.1\n------------------------\n\n");
 
@@ -48,22 +49,22 @@ int main(void)
 	tree->position = 0;
 
 	ReadTree(tree);
+	root = (BtNode*)tree->root;
 
 	/*                            BEGIN - TESTS                           */
-
-
 
 	/*                             END - TESTS                            */
 
 	/* deallocate the tree */
-	free(tree->root->data);
-	free(tree->root);
+	free((BtNode*)root->data);
+	free(root);
 	free(tree->meta);
-	free(tree->nodemeta->freelist);
-	free(tree->nodemeta);
+	free(tree->freelist);
 	free(tree);
 
 	fclose(tree->file);
 
 	return 0;
 }
+
+// void main(void) { PrepareNewDb(); }

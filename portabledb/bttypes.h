@@ -10,8 +10,8 @@
 
 #include <stdio.h>
 
-#define CHILD	0
-#define LEAF	1
+#define INTERNAL	0
+#define LEAF		1
 
 typedef unsigned short int	SHORT;
 typedef unsigned long int	LONG;
@@ -33,25 +33,31 @@ typedef struct {
 
 } BtMeta;
 
+/* ************************************************************************* */
+
+/* ************************************************************************* */
+/*                           B-tree data structure                           */
+/* ************************************************************************* */
+
 typedef struct {
 
-	SHORT	nodeLength;
-	SHORT	minRecords;
-	SHORT	maxRecords;
-	SHORT	posChildren;
-	SHORT	posLeaf;
-	SHORT	posCount;
-	SHORT	recordLength;
-	SHORT	keyLength;
-	SHORT	keyPosition;
-	SHORT	freelistSize;
-	SHORT	freeNodes;
-	LONG*	freelist;
+	BtMeta*		meta;
+	void*		root;
+	FILE*		file;
+	LONG*		freelist;
+	LONG		position;
 
-} BtNodeMeta;
+	/* node meta-data */
+	SHORT		nodeLength;
+	SHORT		minRecords;
+	SHORT		maxRecords;
+	SHORT		posChildren;
+	SHORT		posLeaf;
+	SHORT		posCount;
 
+} BtTree;
 
-void CalculateNodeMeta(BtMeta* btmeta, BtNodeMeta* btnodemeta);
+void CalculateNodeMeta(BtTree* tree);
 
 /* ************************************************************************* */
 
@@ -63,57 +69,33 @@ typedef struct {
 
 	char*	data;
 	LONG	position;
+	BtTree* tree;
 
 } BtNode;
 
 char* GetRecord(
-		const BtNodeMeta* nodemeta,
 		const BtNode* node,
 		const SHORT index);
 
 char* GetKey(
-		const BtNodeMeta* nodemeta,
 		const BtNode* node,
 		const SHORT index);
 
 LONG* GetChild(
-		const BtNodeMeta* nodemeta,
 		const BtNode* node,
 		const SHORT index);
 
-SHORT GetLeaf(
-		const BtNodeMeta* nodemeta,
-		const BtNode* node);
+SHORT GetLeaf(const BtNode* node);
 
 void SetLeaf(
-		const BtNodeMeta* nodemeta,
 		const BtNode* node,
 		const SHORT value);
 
-SHORT GetCount(
-		const BtNodeMeta* nodemeta,
-		const BtNode* node);
+SHORT GetCount(const BtNode* node);
 
 void SetCount(
-		const BtNodeMeta* nodemeta,
 		const BtNode* node,
 		const SHORT value);
-
-/* ************************************************************************* */
-
-/* ************************************************************************* */
-/*                           B-tree data structure                           */
-/* ************************************************************************* */
-
-typedef struct {
-
-	BtMeta*		meta;
-	BtNodeMeta*	nodemeta;
-	BtNode*		root;
-	FILE*		file;
-	LONG		position;
-
-} BtTree;
 
 /* ************************************************************************* */
 

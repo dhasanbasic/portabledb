@@ -33,11 +33,16 @@ void	ReadTree(BtTree* tree);
 /*                              Node functions                             */
 /* ************************************************************************* */
 
-BtNode*	AllocateNode(BtNodeMeta* nodemeta);
+BtNode*	AllocateNode(BtTree* tree);
 
-void	WriteNode(FILE* file, const BtNodeMeta* nodemeta, BtNode* node);
+void	WriteNode(BtNode* node);
 
-void	ReadNode(FILE* file, const BtNodeMeta* nodemeta, BtNode* node);
+void	ReadNode(BtNode* node);
+
+void	SplitChild(
+			BtNode* parent,
+			const SHORT index,
+			BtNode* fullchild);
 
 /* ************************************************************************* */
 
