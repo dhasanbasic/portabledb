@@ -13,9 +13,12 @@
 void PrepareNewDb()
 {
 	FILE* file;
+	BtTree* tree;
 
 	remove("db.dat");
 	file = fopen("db.dat","wb");
+	file = freopen("db.dat", "r+b", file);
+	tree = CreateTree(file,2,16,0,4,2);
 	fclose(file);
 }
 
@@ -56,8 +59,8 @@ int main(void)
 	free(tree->root->data);
 	free(tree->root);
 	free(tree->meta);
+	free(tree->nodemeta->freelist);
 	free(tree->nodemeta);
-	free(tree->freelist);
 	free(tree);
 
 	fclose(tree->file);

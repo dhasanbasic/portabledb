@@ -16,14 +16,14 @@
 /* ************************************************************************* */
 
 BtTree*	CreateTree(
-			FILE*						file,
-			const unsigned short int	order,
-			const unsigned short int	recordLength,
-			const unsigned short int	keyPosition,
-			const unsigned short int	keyLength,
-			const unsigned short int	freelistSize);
+			FILE*		file,
+			const SHORT	order,
+			const SHORT	recordLength,
+			const SHORT	keyPosition,
+			const SHORT	keyLength,
+			const SHORT	freelistSize);
 
-void	WriteTree(const BtTree*	tree);
+void	WriteTree(BtTree* tree);
 
 void	ReadTree(BtTree* tree);
 
@@ -35,9 +35,9 @@ void	ReadTree(BtTree* tree);
 
 BtNode*	AllocateNode(BtNodeMeta* nodemeta);
 
-void	WriteNode(FILE* file, BtNode* node, const long int position);
+void	WriteNode(FILE* file, const BtNodeMeta* nodemeta, BtNode* node);
 
-void	ReadNode(FILE* file, BtNode* node, const long int position);
+void	ReadNode(FILE* file, const BtNodeMeta* nodemeta, BtNode* node);
 
 /* ************************************************************************* */
 

@@ -13,19 +13,35 @@
 BtNode* AllocateNode(BtNodeMeta* nodemeta)
 {
 	BtNode* node = (BtNode*)malloc(sizeof(BtNode));
-	node->meta = nodemeta;
+
 	node->data = (char*)malloc(nodemeta->nodeLength);
+
+	/* is there any free node? */
+	if(nodemeta->freeNodes > 0)
+	{
+		node->position = nodemeta->freelist[nodemeta->freeNodes - 1];
+		nodemeta->freeNodes--;
+	}
+	else
+		node->position = 0;
+
 	return node;
 }
 
-void	WriteNode(FILE* file, BtNode* node, const long int position)
+void	WriteNode(FILE* file, const BtNodeMeta* nodemeta, BtNode* node)
 {
-	fseek(file, position, SEEK_SET);
-	fwrite(node->data, node->meta->nodeLength, 1, file);
+	if(node->position > 0)
+		fseek(file, node->position, SEEK_SET);
+	else
+	{
+		fseek(file, 0, SEEK_END);
+		node->position = ftell(file);
+	}
+	fwrite(node->data, nodemeta->nodeLength, 1, file);
 }
 
-void	ReadNode(FILE* file, BtNode* node, const long int position)
+void	ReadNode(FILE* file, const BtNodeMeta* nodemeta, BtNode* node)
 {
-	fseek(file, position, SEEK_SET);
-	fread(node->data, node->meta->nodeLength, 1, file);
+	fseek(file, node->position, SEEK_SET);
+	fread(node->data, nodemeta->nodeLength, 1, file);
 }
