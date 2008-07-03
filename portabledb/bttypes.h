@@ -81,7 +81,7 @@ char* GetKey(
 		const BtNode* node,
 		const SHORT index);
 
-LONG* GetChild(
+char* GetChild(
 		const BtNode* node,
 		const SHORT index);
 

@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <malloc.h>
 
+#include <string.h>
+
 #include "btree.h"
 
 void PrepareNewDb()
@@ -36,6 +38,25 @@ void PrintTreeMeta(const BtTree* tree)
 	printf("posCount\t\t: %u\n", tree->posCount);
 }
 
+void PrintNode(const BtNode* node)
+{
+	SHORT i;
+	char* record = (char*)malloc(node->tree->meta->recordLength);
+	printf("L%u R%u\t", GetLeaf(node), GetCount(node));
+	for(i=1; i <= GetCount(node); i++)
+	{
+		memcpy(record, GetRecord(node,i), node->tree->meta->recordLength);
+		printf("[%s]",record);
+	}
+	if(GetLeaf(node) == INTERNAL)
+	{
+		printf(" ");
+		for(i=1; i <= GetCount(node)+1; i++)
+			printf("{%lu}",*((LONG*)GetChild(node,i)));
+	}
+	printf("\n");
+}
+
 int main(void)
 {
 	BtTree* tree;
@@ -56,7 +77,7 @@ int main(void)
 	/*                             END - TESTS                            */
 
 	/* deallocate the tree */
-	free((BtNode*)root->data);
+	free(root->data);
 	free(root);
 	free(tree->meta);
 	free(tree->freelist);

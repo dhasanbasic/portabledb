@@ -9,6 +9,7 @@
 
 #include <malloc.h>
 #include <stdio.h>
+#include <string.h>
 
 BtNode* AllocateNode(BtTree* tree)
 {
@@ -46,3 +47,44 @@ void	ReadNode(BtNode* node)
 	fseek(node->tree->file, node->position, SEEK_SET);
 	fread(node->data, node->tree->nodeLength, 1, node->tree->file);
 }
+
+void	SplitChild(
+			BtNode* x,
+			const SHORT i,
+			BtNode* y)
+{
+	BtTree* tree		= x->tree;
+	BtNode* z			= AllocateNode(tree);
+	SHORT order			= tree->meta->order;
+	SHORT recordLength	= tree->meta->recordLength;
+	SHORT minRecords	= tree->minRecords;
+
+	/* update the new child node (z) */
+	SetLeaf(z, GetLeaf(y));
+	SetCount(z, minRecords);
+
+	memcpy(GetRecord(z,1), GetRecord(y,order+1), minRecords * recordLength);
+
+	if (GetLeaf(y) == INTERNAL)
+	{
+		memcpy(GetChild(z,1), GetChild(y,order+1), order * sizeof(LONG));
+	}
+
+//	WriteNode(z);
+
+	/* update the split child node */
+	SetCount(y, minRecords);
+//	WriteNode(y);
+
+	/* update the parent node */
+	memmove(GetChild(x,i+2), GetChild(x,i+1), (GetCount(x)-i+1)*sizeof(LONG));
+	memmove(GetRecord(x,i+1), GetRecord(x,i), (GetCount(x)-i+1)*recordLength);
+
+	*((LONG*)GetChild(x,i+1)) = z->position;
+	memcpy(GetRecord(x,i), GetRecord(y,order), recordLength);
+
+	SetCount(x, GetCount(x)+1);
+
+//	WriteNode(x);
+}
+
