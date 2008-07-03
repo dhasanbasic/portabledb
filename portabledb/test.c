@@ -61,6 +61,10 @@ int main(void)
 {
 	BtTree* tree;
 	BtNode* root;
+	BtSearchParam* p;
+
+	SHORT a = 1, b = 3, c = 5;
+	char  k = 1;
 
 	printf("PortableDB Version 0.1\n------------------------\n\n");
 
@@ -73,6 +77,20 @@ int main(void)
 	root = (BtNode*)tree->root;
 
 	/*                            BEGIN - TESTS                           */
+
+	memcpy(GetRecord(root,1), &a, 1);
+	memcpy(GetRecord(root,2), &b, 1);
+	memcpy(GetRecord(root,3), &c, 1);
+
+	SetCount(root,3);
+
+	p = (BtSearchParam*)malloc(sizeof(BtSearchParam));
+	p->node = root;
+	p->key = &k;
+
+	SearchTree(p);
+
+	printf("Result: %s\n",p->result==SEARCH_FOUND?"SEARCH_FOUND":"SEARCH_NOTFOUND");
 
 	/*                             END - TESTS                            */
 
