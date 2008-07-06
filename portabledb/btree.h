@@ -27,24 +27,37 @@ void	WriteTree(BtTree* tree);
 
 void	ReadTree(BtTree* tree);
 
-void	SearchTree(BtSearchParam* p);
-
 /* ************************************************************************* */
 
 /* ************************************************************************* */
 /*                              Node functions                             */
 /* ************************************************************************* */
 
-BtNode*	AllocateNode(BtTree* tree);
+#define MODE_FREELIST	0
+#define MODE_MEMORY		1
+
+BtNode*	AllocateNode(BtTree* tree, const int mode);
 
 void	WriteNode(BtNode* node);
 
 void	ReadNode(BtNode* node);
 
-void	SplitChild(
+/* ************************************************************************* */
+
+/* ************************************************************************* */
+/*                              Helper functions                             */
+/* ************************************************************************* */
+
+void	BtreeSearch(BtSearchParam* p);
+
+void	BtreeInsert(BtTree* tree, const void* record);
+
+void	BtreeSplitChild(
 			BtNode* parent,
 			const SHORT index,
 			BtNode* fullchild);
+
+void	BtreeInsertNonfull(BtInsertParam* p);
 
 /* ************************************************************************* */
 

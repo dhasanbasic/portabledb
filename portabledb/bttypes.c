@@ -34,12 +34,29 @@ char* GetKey(
 			+ node->tree->meta->keyPosition);
 }
 
-char* GetChild(
+char* GetChildPtr(
 		const BtNode* node,
 		const SHORT index)
 {
 	return (char*)(node->data + node->tree->posChildren
 			+ (index-1)*sizeof(LONG));
+}
+
+LONG GetChild(
+		const BtNode* node,
+		const SHORT index)
+{
+	return *((LONG*)(node->data + node->tree->posChildren
+			+ (index-1)*sizeof(LONG)));
+}
+
+void SetChild(
+		const BtNode* node,
+		const SHORT index,
+		const LONG value)
+{
+	*((LONG*)(node->data + node->tree->posChildren
+			+ (index-1)*sizeof(LONG))) = value;
 }
 
 SHORT GetLeaf(const BtNode* node)

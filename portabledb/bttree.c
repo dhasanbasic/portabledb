@@ -39,7 +39,7 @@ BtTree*	CreateTree(
 	tree->freelist = (LONG*)malloc(freelistSize * sizeof(LONG));
 
 	/* allocate the root node */
-	root = AllocateNode(tree);
+	root = AllocateNode(tree,MODE_MEMORY);
 
 	/* fill in the root node */
 	SetCount(root, 0);
@@ -108,40 +108,4 @@ void	ReadTree(BtTree* tree)
 	fread(root->data, tree->nodeLength, 1, tree->file);
 
 	tree->root = root;
-}
-
-void	SearchTree(BtSearchParam* p)
-{
-	SHORT i = 1;
-	SHORT keyLength = p->node->tree->meta->keyLength;
-
-	while (i <= GetCount(p->node)
-		&& (memcmp(p->key, GetKey(p->node,i), keyLength) > 0)) i++;
-
-	if (i <= GetCount(p->node)
-		&& (memcmp(p->key, GetKey(p->node,i), keyLength) == 0))
-	{
-		p->result = SEARCH_FOUND;
-		p->index = i;
-		return;
-	}
-
-	if (GetLeaf(p->node) == LEAF)
-	{
-		p->result = SEARCH_NOTFOUND;
-		return;
-	}
-	else
-	{
-		if(p->node == (BtNode*)p->node->tree->root)
-		{
-			BtTree* tree = p->node->tree;
-			p->node = (BtNode*)malloc(sizeof(BtNode));
-			p->node->tree = tree;
-		}
-
-		p->node->position = *((LONG*)GetChild(p->node,i));
-		ReadNode(p->node);
-		SearchTree(p);
-	}
 }

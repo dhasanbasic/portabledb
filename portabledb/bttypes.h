@@ -81,9 +81,18 @@ char* GetKey(
 		const BtNode* node,
 		const SHORT index);
 
-char* GetChild(
+char* GetChildPtr(
 		const BtNode* node,
 		const SHORT index);
+
+LONG GetChild(
+		const BtNode* node,
+		const SHORT index);
+
+void SetChild(
+		const BtNode* node,
+		const SHORT index,
+		const LONG value);
 
 SHORT GetLeaf(const BtNode* node);
 
@@ -112,6 +121,13 @@ typedef struct {
 
 #define SEARCH_FOUND	 1
 #define SEARCH_NOTFOUND	-1
+
+typedef struct {
+	BtNode*	node;
+	char*	key;
+	char*	record;
+} BtInsertParam;
+
 
 /* ************************************************************************* */
 
