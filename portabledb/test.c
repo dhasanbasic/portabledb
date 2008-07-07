@@ -12,6 +12,44 @@
 
 #include "btree.h"
 
+void PrintTree(const BtNode* root)
+{
+	SHORT i,j;
+	BtNode* tmp = AllocateNode(root->tree,MODE_MEMORY);
+	char* record = (char*)malloc(root->tree->meta->recordLength);
+
+	printf("p[%lu] L[%u] R[%u]  ", root->position, GetLeaf(root), GetCount(root));
+
+	for(i=1; i <= GetCount(root); i++)
+	{
+		memcpy(record, GetRecord(root,i), root->tree->meta->recordLength);
+		printf("[");
+		for(j=0;j<root->tree->meta->recordLength;printf("%c",record[j++]));
+		printf("]");
+	}
+
+	if(GetLeaf(root) == INTERNAL)
+	{
+		printf(" ");
+		/* print the children list */
+		for(i=1; i <= GetCount(root)+1; i++)
+			printf("{%lu}",GetChild(root,i));
+		printf("\n");
+
+		for(i=1; i <= GetCount(root)+1; i++)
+		{
+			tmp->position = GetChild(root,i);
+			ReadNode(tmp);
+			PrintTree(tmp);
+		}
+	}
+	printf("\n");
+
+	free(tmp->data);
+	free(tmp);
+	free(record);
+}
+
 void PrepareNewDb()
 {
 	FILE* file;
@@ -38,29 +76,9 @@ void PrintTreeMeta(const BtTree* tree)
 	printf("posCount\t\t: %u\n", tree->posCount);
 }
 
-void PrintNode(const BtNode* node)
-{
-	SHORT i;
-	char* record = (char*)malloc(node->tree->meta->recordLength);
-	printf("L%u R%u\t", GetLeaf(node), GetCount(node));
-	for(i=1; i <= GetCount(node); i++)
-	{
-		memcpy(record, GetRecord(node,i), node->tree->meta->recordLength);
-		printf("[%s]",record);
-	}
-	if(GetLeaf(node) == INTERNAL)
-	{
-		printf(" ");
-		for(i=1; i <= GetCount(node)+1; i++)
-			printf("{%lu}",*((LONG*)GetChild(node,i)));
-	}
-	printf("\n");
-}
-
 int main(void)
 {
 	BtTree* tree;
-	BtNode* root;
 
 	printf("PortableDB Version 0.1\n------------------------\n\n");
 
@@ -70,15 +88,32 @@ int main(void)
 	tree->position = 0;
 
 	ReadTree(tree);
-	root = (BtNode*)tree->root;
 
-	/*                            BEGIN - TESTS                           */
+/*                            BEGIN - TESTS                           */
 
-	/*                             END - TESTS                            */
+	InsertRecord(tree,"Y");
+	InsertRecord(tree,"A");
+	InsertRecord(tree,"F");
+	InsertRecord(tree,"G");
+	InsertRecord(tree,"B");
+	InsertRecord(tree,"M");
+	InsertRecord(tree,"L");
+	InsertRecord(tree,"K");
+	InsertRecord(tree,"X");
+	InsertRecord(tree,"I");
+	InsertRecord(tree,"Z");
+	InsertRecord(tree,"J");
+	InsertRecord(tree,"V");
+	InsertRecord(tree,"C");
+	InsertRecord(tree,"H");
+
+	PrintTree((BtNode*)tree->root);
+
+/*                             END - TESTS                            */
 
 	/* deallocate the tree */
-	free(root->data);
-	free(root);
+	free(((BtNode*)tree->root)->data);
+	free((BtNode*)tree->root);
 	free(tree->meta);
 	free(tree->freelist);
 	free(tree);

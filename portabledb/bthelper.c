@@ -61,6 +61,9 @@ void	BtreeInsert(BtTree* tree, const void* record)
 		/* split the old root */
 		BtreeSplitChild(newRoot,1,root);
 		tree->meta->rootPosition = newRoot->position;
+		free(root->data);
+		free(root);
+		WriteTree(tree);
 
 		/* continue the insertion */
 		p->node = newRoot;
@@ -123,17 +126,16 @@ void	BtreeInsertNonfull(BtInsertParam* p)
 	SHORT recordLength = p->node->tree->meta->recordLength;
 	BtNode* child;
 
-	while (i>=1 && (memcmp(p->key, GetKey(p->node,i), keyLength) < 0)) i--;
 
 	if(GetLeaf(p->node) == LEAF)
 	{
 		/* shift a few records (if needed to) */
-		if((GetCount(p->node) - i) > 0)
+		while (i>=1 && (memcmp(p->key, GetKey(p->node,i), keyLength) < 0))
 		{
-			memmove(GetRecord(p->node,i+1),
-					GetRecord(p->node,i),
-					GetCount(p->node)-i);
+			memcpy(GetRecord(p->node,i+1),GetRecord(p->node,i),recordLength);
+			i--;
 		}
+
 		/* insert the record and update the node */
 		memcpy(GetRecord(p->node,i+1), p->record, recordLength);
 		SetCount(p->node,GetCount(p->node)+1);
@@ -141,6 +143,9 @@ void	BtreeInsertNonfull(BtInsertParam* p)
 	}
 	else
 	{
+		/* find the appropriate child node */
+		while (i>=1 && (memcmp(p->key, GetKey(p->node,i), keyLength) < 0))
+			i--;
 		/* traverse to the right child node of the i-th record */
 		i++;
 
@@ -150,10 +155,15 @@ void	BtreeInsertNonfull(BtInsertParam* p)
 
 		/* is it a full child node? */
 		if(GetCount(child) == p->node->tree->maxRecords)
+		{
 			BtreeSplitChild(p->node,i,child);
-
-		if(memcmp(p->key, GetKey(p->node,i), keyLength) > 0)
-			i++;
+			if(memcmp(p->key, GetKey(p->node,i), keyLength) > 0)
+			{
+				i++;
+				child->position = GetChild(p->node,i);
+				ReadNode(child);
+			}
+		}
 
 		/* free unnecessary allocated resources */
 		if(p->node->position != p->node->tree->meta->rootPosition)

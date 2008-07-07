@@ -27,6 +27,10 @@ void	WriteTree(BtTree* tree);
 
 void	ReadTree(BtTree* tree);
 
+void	InsertRecord(BtTree* tree, const void* record);
+
+int		SearchRecord(BtTree* tree, void* key, void* record);
+
 /* ************************************************************************* */
 
 /* ************************************************************************* */

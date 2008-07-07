@@ -76,9 +76,6 @@ void	WriteTree(BtTree* tree)
 	fseek(tree->file, tree->meta->freelistPosition, SEEK_SET);
 	fwrite(tree->freelist, sizeof(LONG),
 			tree->meta->freelistSize, tree->file);
-
-	fseek(tree->file, tree->meta->rootPosition, SEEK_SET);
-	fwrite(root->data, tree->nodeLength, 1, tree->file);
 }
 
 void	ReadTree(BtTree* tree)
@@ -108,4 +105,35 @@ void	ReadTree(BtTree* tree)
 	fread(root->data, tree->nodeLength, 1, tree->file);
 
 	tree->root = root;
+}
+
+void	InsertRecord(BtTree* tree, const void* record)
+{
+	BtreeInsert(tree, record);
+}
+
+int		SearchRecord(BtTree* tree, void* key, void* record)
+{
+	BtSearchParam* p = (BtSearchParam*)malloc(sizeof(BtSearchParam));
+	int result;
+
+	p->node = (BtNode*)tree->root;
+	p->key = (char*)key;
+	p->result = SEARCH_NOTFOUND;
+
+	BtreeSearch(p);
+
+	if (p->result == SEARCH_FOUND)
+		memcpy(record, GetRecord(p->node,p->index), tree->meta->recordLength);
+
+	if (p->node->position != tree->meta->rootPosition)
+	{
+		free(p->node->data);
+		free(p->node);
+	}
+
+	result = p->result;
+	free(p);
+
+	return result;
 }
