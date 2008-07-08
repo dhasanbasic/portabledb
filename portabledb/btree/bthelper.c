@@ -4,7 +4,7 @@
  *  Created on: Jul 6, 2008
  *      Author: dinko
  */
-#include "btree.h"
+#include "../btree.h"
 
 #include <malloc.h>
 #include <string.h>

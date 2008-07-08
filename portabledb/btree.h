@@ -8,7 +8,7 @@
 #ifndef BTREE_H_
 #define BTREE_H_
 
-#include "bttypes.h"
+#include "btree/bttypes.h"
 #include <stdio.h>
 
 /* ************************************************************************* */

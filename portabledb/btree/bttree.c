@@ -5,7 +5,7 @@
  *      Author: dinko
  */
 
-#include "btree.h"
+#include "../btree.h"
 
 #include <malloc.h>
 #include <stdio.h>
