@@ -25,7 +25,7 @@ BtTree*	CreateTree(
 
 void	WriteTree(BtTree* tree);
 
-void	ReadTree(BtTree* tree);
+BtTree*	ReadTree(FILE* file, const LONG position);
 
 void	FreeTree(BtTree* tree);
 

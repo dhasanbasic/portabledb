@@ -10,9 +10,11 @@
 
 #include "../btree/bttypes.h"
 
+#include <stdio.h>
+
 typedef struct
 {
-	char	name[8];
+	char	name[6];
 	SHORT	length;
 
 } FieldType;
@@ -22,24 +24,24 @@ typedef struct
 	SHORT 	id;
 	char	name[32];
 	char	primaryKey;
-	char	type[8];
+	char	type[6];
 	SHORT	length;
 
 } Field;
 
 typedef struct
 {
-	unsigned char	id;
-	char			name[32];
-	LONG			dataTree;
-	SHORT			numFields;
+	SHORT	id;
+	char	name[32];
+	LONG	dataTree;
+	SHORT	numFields;
 
 } TableMeta;
 
 typedef struct
 {
 	TableMeta*	meta;
-	Field**		fields;
+	Field*		fields;
 	BtTree*		data;
 
 } Table;
@@ -52,14 +54,15 @@ typedef struct
 	LONG	fieldTree;
 	LONG	tableTree;
 
-} DbMeta;
+} DatabaseMeta;
 
 typedef struct
 {
-	DbMeta*		meta;
-	FieldType**	fieldTypes;
-	BtTree*		tables;
-	BtTree*		fieldTree;
+	DatabaseMeta*	meta;
+	FieldType*		types;
+	BtTree*			tables;
+	BtTree*			fields;
+	FILE*			file;
 
 } Database;
 

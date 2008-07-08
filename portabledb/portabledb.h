@@ -11,4 +11,31 @@
 #include "database/dbtypes.h"
 #include "btree.h"
 
+#include <stdio.h>
+
+/* ************************************************************************* */
+/*                            Database operations                            */
+/* ************************************************************************* */
+
+void CreateDatabase(
+		const char* 		filename,
+		const FieldType* 	types,
+		const SHORT 		numTypes);
+
+Database* OpenDatabase(const char* filename);
+
+void CloseDatabase(Database* db);
+
+/* ************************************************************************* */
+
+/* ************************************************************************* */
+/*                               Table operations                            */
+/* ************************************************************************* */
+
+Table* StartTableDefintion(const short numFields);
+
+void   EndTableDefintion(Table* t);
+
+/* ************************************************************************* */
+
 #endif /* DATABASE_H_ */
