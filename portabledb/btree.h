@@ -29,7 +29,9 @@ void	ReadTree(BtTree* tree);
 
 void	InsertRecord(BtTree* tree, const void* record);
 
-int		SearchRecord(BtTree* tree, void* key, void* record);
+int		SearchRecord(BtTree* tree, const void* key, void* record);
+
+int		DeleteRecord(BtTree* tree, const void* key);
 
 /* ************************************************************************* */
 
@@ -52,7 +54,10 @@ void	ReadNode(BtNode* node);
 /*                              Helper functions                             */
 /* ************************************************************************* */
 
-void	BtreeSearch(BtSearchParam* p);
+void	BtreeSearch(
+			BtNode* node,
+			const char* key,
+			BtSearchResult* p);
 
 void	BtreeInsert(BtTree* tree, const void* record);
 
@@ -62,6 +67,24 @@ void	BtreeSplitChild(
 			BtNode* fullchild);
 
 void	BtreeInsertNonfull(BtInsertParam* p);
+
+void	BtreeMergeNodes(
+			BtNode* x,
+			BtNode* y,
+			const SHORT i,
+			BtNode* z);
+
+#define TYPE_LEFT	-1
+#define TYPE_RIGHT	 1
+
+void	BtreeReduceSibling(
+			BtNode* parent,
+			BtNode* child,
+			BtNode* sibling,
+			const SHORT i,
+			const int type);
+
+int		BtreeDelete(BtNode* node, const void* key);
 
 /* ************************************************************************* */
 

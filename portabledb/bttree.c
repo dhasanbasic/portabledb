@@ -68,8 +68,6 @@ BtTree*	CreateTree(
 
 void	WriteTree(BtTree* tree)
 {
-	BtNode* root = (BtNode*)tree->root;
-
 	fseek(tree->file, tree->position, SEEK_SET);
 	fwrite(tree->meta,sizeof(BtMeta),1,tree->file);
 
@@ -112,28 +110,71 @@ void	InsertRecord(BtTree* tree, const void* record)
 	BtreeInsert(tree, record);
 }
 
-int		SearchRecord(BtTree* tree, void* key, void* record)
+int		SearchRecord(BtTree* tree, const void* key, void* record)
 {
-	BtSearchParam* p = (BtSearchParam*)malloc(sizeof(BtSearchParam));
+	BtSearchResult* p = (BtSearchResult*)malloc(sizeof(BtSearchResult));
+	BtNode* tmp = 0;
 	int result;
 
-	p->node = (BtNode*)tree->root;
-	p->key = (char*)key;
 	p->result = SEARCH_NOTFOUND;
 
-	BtreeSearch(p);
+	BtreeSearch((BtNode*)tree->root,key,p);
 
 	if (p->result == SEARCH_FOUND)
-		memcpy(record, GetRecord(p->node,p->index), tree->meta->recordLength);
-
-	if (p->node->position != tree->meta->rootPosition)
 	{
-		free(p->node->data);
-		free(p->node);
+		if(p->position != tree->meta->rootPosition)
+		{
+			tmp = AllocateNode(tree,MODE_MEMORY);
+			tmp->position = p->position;
+			ReadNode(tmp);
+		}
+		else
+			tmp = (BtNode*)tree->root;
+
+		memcpy(record, GetRecord(tmp,p->index), tree->meta->recordLength);
+	}
+
+	if (tmp > 0 && tmp->position != tree->meta->rootPosition)
+	{
+		free(tmp->data);
+		free(tmp);
 	}
 
 	result = p->result;
 	free(p);
 
+	return result;
+}
+
+int		DeleteRecord(BtTree* tree, const void* key)
+{
+	BtNode* root = (BtNode*)tree->root;
+	BtNode* tmp;
+
+	int result = DELETION_FAILED;
+
+	result = BtreeDelete(root,key);
+
+	if(GetCount(root) == 0)
+	{
+		/* decrease the height of the B-tree */
+		tmp = AllocateNode(tree,MODE_MEMORY);
+		tmp->position = GetChild(root,1);
+		ReadNode(tmp);
+		tree->meta->rootPosition = tmp->position;
+		tree->root = tmp;
+
+		/* free the child z */
+		if(tree->meta->freeNodes < tree->meta->freelistSize)
+		{
+			tree->freelist[tree->meta->freeNodes] = root->position;
+			tree->meta->freeNodes++;
+		}
+
+		free(root->data);
+		free(root);
+
+		printf("*** B-tree height decreased\n");
+	}
 	return result;
 }

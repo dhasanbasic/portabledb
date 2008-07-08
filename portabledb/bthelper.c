@@ -9,35 +9,45 @@
 #include <malloc.h>
 #include <string.h>
 
-void	BtreeSearch(BtSearchParam* p)
+void	BtreeSearch(
+			BtNode* node,
+			const char* key,
+			BtSearchResult* p)
 {
 	SHORT i = 1;
-	SHORT keyLength = p->node->tree->meta->keyLength;
+	SHORT keyLength = node->tree->meta->keyLength;
+	BtNode* next;
 
-	while (i <= GetCount(p->node)
-		&& (memcmp(p->key, GetKey(p->node,i), keyLength) > 0)) i++;
+	while (i <= GetCount(node)
+		&& (memcmp(key, GetKey(node,i), keyLength) > 0)) i++;
 
-	if (i <= GetCount(p->node)
-		&& (memcmp(p->key, GetKey(p->node,i), keyLength) == 0))
+	if (i <= GetCount(node)
+		&& (memcmp(key, GetKey(node,i), keyLength) == 0))
 	{
 		p->result = SEARCH_FOUND;
+		p->position = node->position;
 		p->index = i;
-		return;
+		goto END;
 	}
 
-	if (GetLeaf(p->node) == LEAF)
+	if (GetLeaf(node) == LEAF)
 	{
 		p->result = SEARCH_NOTFOUND;
-		return;
+		goto END;
 	}
 	else
 	{
-		if(p->node->position == p->node->tree->meta->rootPosition)
-			p->node = AllocateNode(p->node->tree,MODE_MEMORY);
+		next = AllocateNode(node->tree,MODE_MEMORY);
+		next->position = GetChild(node,i);
+		ReadNode(next);
+		BtreeSearch(node,key,p);
+	}
 
-		p->node->position = GetChild(p->node,i);
-		ReadNode(p->node);
-		BtreeSearch(p);
+END:
+	if(node->position != node->tree->meta->rootPosition)
+	{
+		free(node->data);
+		free(node);
 	}
 }
 
@@ -176,4 +186,280 @@ void	BtreeInsertNonfull(BtInsertParam* p)
 		p->node = child;
 		BtreeInsertNonfull(p);
 	}
+}
+
+void	BtreeMergeNodes(
+			BtNode* x,
+			BtNode* y,
+			const SHORT i,
+			BtNode* z)
+{
+	BtTree* tree		= x->tree;
+	SHORT order			= tree->meta->order;
+	SHORT recordLength	= tree->meta->recordLength;
+	SHORT minRecords	= tree->minRecords;
+	SHORT maxRecords	= tree->maxRecords;
+
+	/* copy the median key from parent x to child y */
+	memcpy(GetRecord(y,order), GetRecord(x,i), recordLength);
+
+	/* copy the keys and children (if necessary) of child z to child y */
+	memcpy(GetRecord(y,order+1), GetRecord(z,1), minRecords * recordLength);
+
+	if (GetLeaf(z) == INTERNAL)
+		memcpy(GetChildPtr(y,order+1), GetChildPtr(z,1), order * sizeof(LONG));
+
+	SetCount(y,maxRecords);
+	WriteNode(y);
+
+	/* remove both the median key and pointer to child z from x */
+	memmove(GetRecord(x,i), GetRecord(x,i+1), (GetCount(x)-i)*recordLength);
+
+	memmove(GetChildPtr(x,i+1), GetChildPtr(x,i+2),
+			(GetCount(x)-i)*sizeof(LONG));
+
+	SetCount(x,GetCount(x)-1);
+	WriteNode(x);
+
+	/* free the child z */
+	if(tree->meta->freeNodes < tree->meta->freelistSize)
+	{
+		tree->freelist[tree->meta->freeNodes] = z->position;
+		tree->meta->freeNodes++;
+	}
+
+	free(z->data);
+	free(z);
+}
+
+void	BtreeReduceSibling(
+			BtNode* parent,
+			BtNode* child,
+			BtNode* sibling,
+			const SHORT i,
+			const int type)
+{
+	SHORT recordLength = parent->tree->meta->recordLength;
+
+	if(type == TYPE_LEFT)
+	{
+		/* allocate space for the new record */
+		memmove(GetRecord(child,2),GetRecord(child,1),
+				GetCount(child)*recordLength);
+
+		memmove(GetChildPtr(child,2),GetChildPtr(child,1),
+				(GetCount(child)+1)*sizeof(LONG));
+
+		/* take the predecessor of the child node from the parent */
+		memcpy(GetRecord(child,1), GetRecord(parent,i-1), recordLength);
+
+		/* push the last record from the left sibling up to the parent */
+		memcpy(GetRecord(parent,i-1),
+				GetRecord(sibling,GetCount(sibling)),
+				recordLength);
+
+		/* update the child pointers of the siblings */
+		memcpy(GetChildPtr(child,1),
+				GetChildPtr(sibling,GetCount(sibling)+1),
+				sizeof(LONG));
+
+		SetCount(sibling,GetCount(sibling)-1);
+	}
+	else /* type = TYPE_RIGHT */
+	{
+		/* take the successor of the child node from the parent */
+		memcpy(GetRecord(child,GetCount(child)+1),
+				GetRecord(parent,i+1), recordLength);
+
+		/* push the last record from the right sibling up to the parent */
+		memcpy(GetRecord(parent,i+1),
+				GetRecord(sibling,1),
+				recordLength);
+
+		/* update the child pointers of the siblings */
+		memcpy(GetChildPtr(child,GetCount(child)+2),
+				GetChildPtr(sibling,1),sizeof(LONG));
+
+		/* update the sibling */
+		SetCount(sibling,GetCount(sibling)-1);
+
+		memmove(GetRecord(sibling,1),GetRecord(sibling,2),
+				GetCount(sibling)*recordLength);
+
+		memmove(GetChildPtr(sibling,1),GetChildPtr(sibling,2),
+				(GetCount(sibling)+1)*sizeof(LONG));
+	}
+
+	/* save the changes */
+	SetCount(child,GetCount(child+1));
+	WriteNode(parent);
+	WriteNode(sibling);
+	WriteNode(child);
+}
+
+int		BtreeDelete(BtNode* node, const void* key)
+{
+	SHORT i = 1;
+	SHORT order = node->tree->meta->order;
+	SHORT keyLength = node->tree->meta->keyLength;
+	SHORT recordLength = node->tree->meta->recordLength;
+	SHORT minRecords = node->tree->minRecords;
+
+	BtNode *y, *z, *c;
+
+	int result;
+
+	/* search for the record */
+	while (i <= GetCount(node)
+		&& (memcmp(key, GetKey(node,i), keyLength) > 0)) i++;
+
+
+	if(GetLeaf(node) == LEAF)
+	{
+		/* is the record in the current node? */
+		if (i <= GetCount(node)
+			&& (memcmp(key, GetKey(node,i), keyLength) == 0))
+		{
+			/* just delete the record */
+			memmove(GetRecord(node,i),GetRecord(node,i+1),
+					(GetCount(node)-i)*recordLength);
+
+			SetCount(node,GetCount(node)-1);
+			WriteNode(node);
+
+			result = DELETION_SUCCEEDED;
+			goto END;
+		}
+		else /* the record does not exist in the B-tree */
+		{
+			result = DELETION_FAILED;
+			goto END;
+		}
+	}
+	else /* p->node is an internal node */
+	{
+		/* is the record in the current (internal) node? */
+		if (i <= GetCount(node)
+			&& (memcmp(key, GetKey(node,i), keyLength) == 0))
+		{
+			/* determine the left child node of the searched record */
+			y = AllocateNode(node->tree,MODE_MEMORY);
+			y->position = GetChild(node,i);
+			ReadNode(y);
+
+			/* child y contains at least "minRecords + 1" records */
+			if(GetCount(y) >= order)
+			{
+				/* replace the searched key by its predecessor */
+				memcpy(GetRecord(node,i),GetRecord(y,GetCount(y)),recordLength);
+				WriteNode(node);
+
+				/* recursively delete the predecessor */
+				BtreeDelete(y,key);
+				result = DELETION_SUCCEEDED;
+				goto END;
+			}
+			else /* child y contains exactly "minRecords" records */
+			{
+				/* determine the right child node of the searched record */
+				z = AllocateNode(node->tree,MODE_MEMORY);
+				z->position = GetChild(node,i+1);
+				ReadNode(z);
+
+				/* child z contains at least "minRecords + 1" records */
+				if(GetCount(z) >= order)
+				{
+					/* replace the searched key by its successor */
+					memcpy(GetRecord(node,i), GetRecord(z,1), recordLength);
+					WriteNode(node);
+
+					/* recursively delete the successor */
+					BtreeDelete(z,key);
+					result = DELETION_SUCCEEDED;
+					goto END;
+				}
+				else /* both children y and z contain "minRecords" records */
+				{
+					BtreeMergeNodes(node,y,i,z);
+					/* WriteNode(node) already done by BtreeMergeNodes() */
+					BtreeDelete(y,key);
+					result = DELETION_SUCCEEDED;
+					goto END;
+
+				} /* END OF "if(GetCount(z) >= order)" */
+
+			} /* END OF "if(GetCount(y) >= order)" */
+		}
+		else /* the record is not in the current (internal) node */
+		{
+			/* load the node that could contain the searched record */
+			c = AllocateNode(node->tree,MODE_MEMORY);
+			c->position = GetChild(node,i);
+			ReadNode(c);
+
+			if(GetCount(c) == minRecords)
+			{
+				/* load the siblings of the child node c, if possible */
+				y = z = 0;
+
+				if(i > 1)
+				{
+					y = AllocateNode(node->tree,MODE_MEMORY);
+					y->position = GetChild(node,i-1);
+					ReadNode(y);
+
+					if(GetCount(y) >= order)
+					{
+						BtreeReduceSibling(node,c,y,i,TYPE_LEFT);
+					}
+					else
+					{
+						if(i < GetCount(node))
+						{
+							z = AllocateNode(node->tree,MODE_MEMORY);
+							z->position = GetChild(node,i+1);
+							ReadNode(z);
+
+							if(GetCount(z) >= order)
+							{
+								BtreeReduceSibling(node,c,z,i,TYPE_RIGHT);
+							}
+							else /* both siblings have "minRecords" records */
+							{
+								/* merge with the right sibling */
+								BtreeMergeNodes(node,c,i,z);
+								z = 0;
+							}
+						}
+					}
+				}
+
+				if(y > 0)
+				{
+					free(y->data);
+					free(y);
+				}
+
+				if(z > 0)
+				{
+					free(z->data);
+					free(z);
+				}
+			}
+
+			BtreeDelete(c,key);
+			result = DELETION_SUCCEEDED;
+			goto END;
+
+		} /* END OF "the searched record is in an internal node" */
+
+	} /* END OF "if(GetLeaf(node) == LEAF)" */
+
+END:
+	if(node->position != node->tree->meta->rootPosition)
+	{
+		free(node->data);
+		free(node);
+	}
+	return result;
 }

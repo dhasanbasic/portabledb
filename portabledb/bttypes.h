@@ -113,11 +113,10 @@ void SetCount(
 /* ************************************************************************* */
 
 typedef struct {
-	BtNode*	node;
-	char*	key;
 	SHORT	index;
+	LONG	position;
 	int		result;
-} BtSearchParam;
+} BtSearchResult;
 
 #define SEARCH_FOUND	 1
 #define SEARCH_NOTFOUND	-1
@@ -128,6 +127,14 @@ typedef struct {
 	char*	record;
 } BtInsertParam;
 
+typedef struct {
+	BtNode*	node;
+	char*	key;
+	int		result;
+} BtDeleteParam;
+
+#define DELETION_SUCCEEDED	 1
+#define DELETION_FAILED		-1
 
 /* ************************************************************************* */
 

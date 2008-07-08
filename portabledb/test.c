@@ -18,7 +18,7 @@ void PrintTree(const BtNode* root)
 	BtNode* tmp = AllocateNode(root->tree,MODE_MEMORY);
 	char* record = (char*)malloc(root->tree->meta->recordLength);
 
-	printf("p[%lu] L[%u] R[%u]  ", root->position, GetLeaf(root), GetCount(root));
+	printf("p:%-4lu  L:%u  R:%-2u ", root->position, GetLeaf(root), GetCount(root));
 
 	for(i=1; i <= GetCount(root); i++)
 	{
@@ -58,7 +58,7 @@ void PrepareNewDb()
 	remove("db.dat");
 	file = fopen("db.dat","wb");
 	file = freopen("db.dat", "r+b", file);
-	tree = CreateTree(file,2,1,0,1,2);
+	tree = CreateTree(file,2,1,0,1,6);
 	fclose(file);
 }
 
@@ -82,6 +82,8 @@ int main(void)
 
 	printf("PortableDB Version 0.1\n------------------------\n\n");
 
+//	PrepareNewDb();
+
 	tree = (BtTree*)malloc(sizeof(BtTree));
 
 	tree->file = fopen("db.dat","r+b");
@@ -90,7 +92,7 @@ int main(void)
 	ReadTree(tree);
 
 /*                            BEGIN - TESTS                           */
-
+/*
 	InsertRecord(tree,"Y");
 	InsertRecord(tree,"A");
 	InsertRecord(tree,"F");
@@ -106,6 +108,13 @@ int main(void)
 	InsertRecord(tree,"V");
 	InsertRecord(tree,"C");
 	InsertRecord(tree,"H");
+*/
+/*
+	DeleteRecord(tree,"A");
+	DeleteRecord(tree,"C");
+	DeleteRecord(tree,"J");
+*/
+	//DeleteRecord(tree,"Y");
 
 	PrintTree((BtNode*)tree->root);
 
