@@ -10,7 +10,7 @@
 
 #include <string.h>
 
-#include "btree.h"
+#include "btree/btree.h"
 
 void PrintTree(const BtNode* root)
 {
@@ -157,14 +157,7 @@ int main(void)
 
 	/* deallocate the tree */
 	WriteTree(tree);
-
-	free(((BtNode*)tree->root)->data);
-	free((BtNode*)tree->root);
-	free(tree->meta);
-	free(tree->freelist);
-	free(tree);
-
-	fclose(tree->file);
+	FreeTree(tree);
 
 	return 0;
 }

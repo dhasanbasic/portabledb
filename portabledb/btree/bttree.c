@@ -105,9 +105,30 @@ void	ReadTree(BtTree* tree)
 	tree->root = root;
 }
 
-void	InsertRecord(BtTree* tree, const void* record)
+void FreeTree(BtTree* tree)
 {
-	BtreeInsert(tree, record);
+	BtNode* root = (BtNode*)tree->root;
+
+	free(root->data);
+	free(root);
+	free(tree->meta);
+	free(tree->freelist);
+	free(tree);
+}
+
+int	InsertRecord(BtTree* tree, const void* record)
+{
+	char* space = (char*)malloc(tree->meta->keyLength);
+
+	if(SearchRecord(tree,record+tree->meta->keyPosition,space)
+			== SEARCH_NOTFOUND)
+	{
+		free(space);
+		BtreeInsert(tree, record);
+		return INSERTION_SUCCEEDED;
+	}
+	free(space);
+	return INSERTION_FAILED;
 }
 
 int		SearchRecord(BtTree* tree, const void* key, void* record)
@@ -150,8 +171,15 @@ int		DeleteRecord(BtTree* tree, const void* key)
 {
 	BtNode* root = (BtNode*)tree->root;
 	BtNode* tmp;
+	int result;
 
-	int result = DELETION_FAILED;
+	char* space = (char*)malloc(tree->meta->keyLength);
+
+	if(SearchRecord(tree,key,space)== SEARCH_NOTFOUND)
+	{
+		free(space);
+		return DELETION_FAILED;
+	}
 
 	result = BtreeDelete(root,key);
 

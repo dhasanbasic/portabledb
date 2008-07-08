@@ -40,7 +40,7 @@ void	BtreeSearch(
 		next = AllocateNode(node->tree,MODE_MEMORY);
 		next->position = GetChild(node,i);
 		ReadNode(next);
-		BtreeSearch(node,key,p);
+		BtreeSearch(next,key,p);
 	}
 
 END:

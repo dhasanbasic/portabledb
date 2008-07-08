@@ -27,7 +27,12 @@ void	WriteTree(BtTree* tree);
 
 void	ReadTree(BtTree* tree);
 
-void	InsertRecord(BtTree* tree, const void* record);
+void	FreeTree(BtTree* tree);
+
+#define INSERTION_FAILED	-1
+#define INSERTION_SUCCEEDED	 1
+
+int		InsertRecord(BtTree* tree, const void* record);
 
 int		SearchRecord(BtTree* tree, const void* key, void* record);
 
