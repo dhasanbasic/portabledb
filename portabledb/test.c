@@ -58,7 +58,7 @@ void PrepareNewDb()
 	remove("db.dat");
 	file = fopen("db.dat","wb");
 	file = freopen("db.dat", "r+b", file);
-	tree = CreateTree(file,2,1,0,1,6);
+	tree = CreateTree(file,3,1,0,1,6);
 	fclose(file);
 }
 
@@ -75,6 +75,46 @@ void PrintTreeMeta(const BtTree* tree)
 	printf("posLeaf\t\t\t: %u\n", tree->posLeaf);
 	printf("posCount\t\t: %u\n", tree->posCount);
 }
+
+LONG createNode(
+		const char* d,
+		const LONG c1,
+		const LONG c2,
+		const LONG c3,
+		const LONG c4,
+		const LONG c5,
+		const LONG c6,
+		const SHORT leaf,
+		const SHORT count,
+		const LONG position,
+		FILE* file)
+{
+	LONG pos;
+	char* data = (char*)malloc(33);
+
+	if(position == 0)
+	{
+		fseek(file,0,SEEK_END);
+		pos = ftell(file);
+	}
+	else pos = position;
+
+	memcpy(data,	d,		5);
+	memcpy(data+5,	&c1,	4);
+	memcpy(data+9,	&c2,	4);
+	memcpy(data+13,	&c3,	4);
+	memcpy(data+17,	&c4,	4);
+	memcpy(data+21,	&c5,	4);
+	memcpy(data+25,	&c6,	4);
+	memcpy(data+29,	&leaf,	2);
+	memcpy(data+31,	&count,	2);
+
+	fseek(file,pos,SEEK_SET);
+	fwrite(data,33,1,file);
+	free(data);
+	return pos;
+}
+
 
 int main(void)
 {
@@ -93,34 +133,31 @@ int main(void)
 
 /*                            BEGIN - TESTS                           */
 /*
-	InsertRecord(tree,"Y");
-	InsertRecord(tree,"A");
-	InsertRecord(tree,"F");
-	InsertRecord(tree,"G");
-	InsertRecord(tree,"B");
-	InsertRecord(tree,"M");
-	InsertRecord(tree,"L");
-	InsertRecord(tree,"K");
-	InsertRecord(tree,"X");
-	InsertRecord(tree,"I");
-	InsertRecord(tree,"Z");
-	InsertRecord(tree,"J");
-	InsertRecord(tree,"V");
-	InsertRecord(tree,"C");
-	InsertRecord(tree,"H");
+	createNode(
+			"P\0\0\0\0",
+			createNode(
+					"CGM\0\0",
+					createNode("AB\0\0\0",0,0,0,0,0,0,LEAF,2,0,tree->file),
+					createNode("DEF\0\0",0,0,0,0,0,0,LEAF,3,0,tree->file),
+					createNode("JKL\0\0",0,0,0,0,0,0,LEAF,3,0,tree->file),
+					createNode("NO\0\0\0",0,0,0,0,0,0,LEAF,2,0,tree->file),
+					0,0,INTERNAL,3,0,tree->file),
+			createNode(
+					"TX\0\0\0",
+					createNode("QRS\0\0",0,0,0,0,0,0,LEAF,3,0,tree->file),
+					createNode("UV\0\0\0",0,0,0,0,0,0,LEAF,2,0,tree->file),
+					createNode("YZ\0\0\0",0,0,0,0,0,0,LEAF,2,0,tree->file),
+					0,0,0,INTERNAL,2,0,tree->file),
+			0,0,0,0,INTERNAL,1,44,tree->file);
 */
-/*
-	DeleteRecord(tree,"A");
-	DeleteRecord(tree,"C");
-	DeleteRecord(tree,"J");
-*/
-	//DeleteRecord(tree,"Y");
 
 	PrintTree((BtNode*)tree->root);
 
 /*                             END - TESTS                            */
 
 	/* deallocate the tree */
+	WriteTree(tree);
+
 	free(((BtNode*)tree->root)->data);
 	free((BtNode*)tree->root);
 	free(tree->meta);

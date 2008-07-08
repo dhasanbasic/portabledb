@@ -269,10 +269,10 @@ void	BtreeReduceSibling(
 	{
 		/* take the successor of the child node from the parent */
 		memcpy(GetRecord(child,GetCount(child)+1),
-				GetRecord(parent,i+1), recordLength);
+				GetRecord(parent,i), recordLength);
 
 		/* push the last record from the right sibling up to the parent */
-		memcpy(GetRecord(parent,i+1),
+		memcpy(GetRecord(parent,i),
 				GetRecord(sibling,1),
 				recordLength);
 
@@ -291,7 +291,7 @@ void	BtreeReduceSibling(
 	}
 
 	/* save the changes */
-	SetCount(child,GetCount(child+1));
+	SetCount(child,GetCount(child)+1);
 	WriteNode(parent);
 	WriteNode(sibling);
 	WriteNode(child);
@@ -307,6 +307,7 @@ int		BtreeDelete(BtNode* node, const void* key)
 
 	BtNode *y, *z, *c;
 
+	int left,right;
 	int result;
 
 	/* search for the record */
@@ -355,7 +356,7 @@ int		BtreeDelete(BtNode* node, const void* key)
 				WriteNode(node);
 
 				/* recursively delete the predecessor */
-				BtreeDelete(y,key);
+				BtreeDelete(y,GetKey(y,GetCount(y)));
 				result = DELETION_SUCCEEDED;
 				goto END;
 			}
@@ -400,7 +401,7 @@ int		BtreeDelete(BtNode* node, const void* key)
 			if(GetCount(c) == minRecords)
 			{
 				/* load the siblings of the child node c, if possible */
-				y = z = 0;
+				left = right = 0;
 
 				if(i > 1)
 				{
@@ -411,43 +412,64 @@ int		BtreeDelete(BtNode* node, const void* key)
 					if(GetCount(y) >= order)
 					{
 						BtreeReduceSibling(node,c,y,i,TYPE_LEFT);
+						left = 1;
 					}
 					else
 					{
-						if(i < GetCount(node))
-						{
-							z = AllocateNode(node->tree,MODE_MEMORY);
-							z->position = GetChild(node,i+1);
-							ReadNode(z);
-
-							if(GetCount(z) >= order)
-							{
-								BtreeReduceSibling(node,c,z,i,TYPE_RIGHT);
-							}
-							else /* both siblings have "minRecords" records */
-							{
-								/* merge with the right sibling */
-								BtreeMergeNodes(node,c,i,z);
-								z = 0;
-							}
-						}
+						left = -1;
 					}
 				}
 
-				if(y > 0)
+				if(i < GetCount(c) && left < 1)
+				{
+					z = AllocateNode(node->tree,MODE_MEMORY);
+					z->position = GetChild(node,i+1);
+					ReadNode(z);
+
+					if(GetCount(z) >= order)
+					{
+						BtreeReduceSibling(node,c,z,i,TYPE_RIGHT);
+						right = 1;
+					}
+					else
+					{
+						right = -1;
+					}
+				}
+
+				/* if both siblings have "minRecords" records */
+				if(left == -1)
+				{
+					/* merge with the left sibling */
+					BtreeMergeNodes(node,y,i,c);
+					c = 0;
+				}
+				else if(right == -1)
+				{
+					/* merge with the right sibling */
+					BtreeMergeNodes(node,c,i,z);
+					z = 0;
+					right = 0;
+				}
+
+				if(left != 0 && c != 0)
 				{
 					free(y->data);
 					free(y);
 				}
 
-				if(z > 0)
+				if(right != 0)
 				{
 					free(z->data);
 					free(z);
 				}
 			}
 
-			BtreeDelete(c,key);
+			if(c == 0)
+				BtreeDelete(y,key);
+			else
+				BtreeDelete(c,key);
+
 			result = DELETION_SUCCEEDED;
 			goto END;
 
