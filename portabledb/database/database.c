@@ -35,8 +35,8 @@ void CreateDatabase(
 	fwrite(types,sizeof(FieldType),numTypes,db->file);
 
 	/* now create the B-trees */
-	db->tables = CreateTree(db->file,11,sizeof(TableMeta),0,sizeof(SHORT),8);
-	db->fields = CreateTree(db->file,11,sizeof(TableMeta),0,sizeof(SHORT),8);
+	db->tables = CreateTree(db->file,10,sizeof(TableMeta),0,sizeof(SHORT),8);
+	db->fields = CreateTree(db->file,10,sizeof(TableMeta),0,sizeof(SHORT),8);
 
 	/* save the positions of the B-trees */
 	db->meta->tableTree = db->tables->position;
@@ -82,6 +82,7 @@ void CloseDatabase(Database* db)
 	WriteTree(db->fields);
 
 	/* write the table meta-data */
+	fseek(db->file,0,SEEK_SET);
 	fwrite(db->meta,sizeof(DatabaseMeta),1,db->file);
 
 	/* free any used space */

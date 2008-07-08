@@ -15,6 +15,7 @@
 int main(void)
 {
 	Database* db;
+	Table* t;
 //	FieldType* types;
 
 	printf("PortableDB Version 0.8\n------------------------\n\n");
@@ -32,7 +33,22 @@ int main(void)
 	return 0;
 */
 	db = OpenDatabase("portable.db");
+/*
+	t = DefineTable(db,"Artikli",10,3);
 
+		DefineField(t,0,"Sifra",5,&db->types[0],0);
+		DefineField(t,1,"Naziv",5,&db->types[1],20);
+		DefineField(t,2,"Cijena",6,&db->types[0],0);
+
+		SetPrimaryKey(t,0);
+
+	AddTable(db,t);
+*/
+	t = LoadTable(db,0);
+
+	printf("%s\n",t->fields[0].name);
+	printf("%s\n",t->fields[1].name);
+	printf("%s\n",t->fields[2].name);
 
 	CloseDatabase(db);
 

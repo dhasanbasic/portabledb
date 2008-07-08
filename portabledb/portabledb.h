@@ -8,8 +8,8 @@
 #ifndef DATABASE_H_
 #define DATABASE_H_
 
-#include "database/dbtypes.h"
 #include "btree.h"
+#include "database/dbtypes.h"
 
 #include <stdio.h>
 
@@ -32,9 +32,25 @@ void CloseDatabase(Database* db);
 /*                               Table operations                            */
 /* ************************************************************************* */
 
-Table* StartTableDefintion(const short numFields);
+Table* DefineTable(
+		const Database* db,
+		const char* name,
+		const SHORT nameLength,
+		const SHORT numFields);
 
-void   EndTableDefintion(Table* t);
+void DefineField(
+		Table*				t,
+		const SHORT			index,
+		const char*			name,
+		const SHORT			nameLength,
+		const FieldType*	type,
+		const SHORT			length);
+
+void SetPrimaryKey(Table* t, const SHORT index);
+
+void AddTable(Database* db,Table* t);
+
+Table* LoadTable(const Database* db, const SHORT id);
 
 /* ************************************************************************* */
 
