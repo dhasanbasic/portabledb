@@ -8,5 +8,7 @@
 #ifndef DATABASE_H_
 #define DATABASE_H_
 
+#include "database/dbtypes.h"
+#include "btree.h"
 
 #endif /* DATABASE_H_ */

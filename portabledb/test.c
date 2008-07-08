@@ -10,7 +10,7 @@
 
 #include <string.h>
 
-#include "btree/btree.h"
+#include "portabledb.h"
 
 void PrintTree(const BtNode* root)
 {
