@@ -2,13 +2,12 @@
  * tables.c
  *
  *  Created on: Jul 8, 2008
- *      Author: dinko
+ *      Author: Dinko Hasanbasic (dinko.hasanbasic@gmail.com)
  */
 
 #include "../portabledb.h"
 
 #include <stdio.h>
-#include <malloc.h>
 #include <string.h>
 
 Table* DefineTable(
@@ -102,7 +101,7 @@ void AddTable(
 		InsertRecord(db->fields,&t->fields[i]);
 
 	/* free any unneeded resources */
-	cfree(t->fields);
+	free(t->fields);
 	free(t->meta);
 	free(t);
 }

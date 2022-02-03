@@ -2,7 +2,7 @@
  * btreetypes.h
  *
  *  Created on: Jul 1, 2008
- *      Author: dinko
+ *      Author: Dinko Hasanbasic (dinko.hasanbasic@gmail.com)
  */
 
 #ifndef BTREETYPES_H_

@@ -2,7 +2,7 @@
  * btree.h
  *
  *  Created on: Jul 1, 2008
- *      Author: dinko
+ *      Author: Dinko Hasanbasic (dinko.hasanbasic@gmail.com)
  */
 
 #ifndef BTREE_H_
@@ -10,6 +10,13 @@
 
 #include "btree/bttypes.h"
 #include <stdio.h>
+
+#ifndef __clang__
+	#include <malloc.h>
+#else
+	#include <stdlib.h>
+#endif
+
 
 /* ************************************************************************* */
 /*                              B-tree functions                             */

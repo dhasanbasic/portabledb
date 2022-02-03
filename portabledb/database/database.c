@@ -2,13 +2,12 @@
  * database.c
  *
  *  Created on: Jul 8, 2008
- *      Author: dinko
+ *      Author: Dinko Hasanbasic (dinko.hasanbasic@gmail.com)
  */
 
 #include "../portabledb.h"
 
 #include <stdio.h>
-#include <malloc.h>
 
 /* Creates an empty database */
 
@@ -89,7 +88,7 @@ void CloseDatabase(Database* db)
 	FreeTree(db->tables);
 	FreeTree(db->fields);
 	free(db->meta);
-	cfree(db->types);
+	free(db->types);
 	fclose(db->file);
 	free(db);
 }

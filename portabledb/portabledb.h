@@ -2,7 +2,7 @@
  * database.h
  *
  *  Created on: Jul 8, 2008
- *      Author: dinko
+ *      Author: Dinko Hasanbasic (dinko.hasanbasic@gmail.com)
  */
 
 #ifndef DATABASE_H_

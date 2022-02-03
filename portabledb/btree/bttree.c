@@ -2,12 +2,11 @@
  * btree.c
  *
  *  Created on: Jul 1, 2008
- *      Author: dinko
+ *      Author: Dinko Hasanbasic (dinko.hasanbasic@gmail.com)
  */
 
 #include "../btree.h"
 
-#include <malloc.h>
 #include <stdio.h>
 #include <string.h>
 

@@ -2,7 +2,7 @@
  * bttypes.c
  *
  *  Created on: Jul 2, 2008
- *      Author: dinko
+ *      Author: Dinko Hasanbasic (dinko.hasanbasic@gmail.com)
  */
 
 #include "bttypes.h"

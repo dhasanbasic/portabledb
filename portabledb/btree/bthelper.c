@@ -2,11 +2,10 @@
  * bthelper.c
  *
  *  Created on: Jul 6, 2008
- *      Author: dinko
+ *      Author: Dinko Hasanbasic (dinko.hasanbasic@gmail.com)
  */
 #include "../btree.h"
 
-#include <malloc.h>
 #include <string.h>
 
 void	BtreeSearch(
